@@ -101,6 +101,10 @@ const Stretch = (() => {
     return "You're staying in Phase 1 until you move on.";
   }
 
+  // Points down while a pill is collapsed; CSS turns it up when the pill is open.
+  const CHEVRON = '<svg class="stage-chev" viewBox="0 0 12 12" aria-hidden="true">' +
+    '<path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+
   function renderPlan() {
     const now = Phase.of();
     const pills = PHASES.map((p, i) => {
@@ -110,7 +114,7 @@ const Stretch = (() => {
       return `<button class="stage-pill${cls}"` +
         ` data-phase="${p.n}" aria-expanded="${openPill === p.n}"><b>${p.name}</b>` +
         `<span>Day ${p.fromDay}${to}` +
-        `${here ? ' · <em class="stage-here">you are here</em>' : ""}</span></button>`;
+        `${here ? ' · <em class="stage-here">you are here</em>' : ""}</span>${CHEVRON}</button>`;
     }).join("");
     let body = "";
     if (openPill) {

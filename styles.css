@@ -1075,3 +1075,30 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
   border: 1.5px solid rgba(107,91,78,.18);
 }
 .stage-pill.open { box-shadow: none; border-color: rgba(90,107,78,.45); }
+/* ── Phase pills as buttons (v0.19) ─────────────────────────────
+   The arrow sits at the end of the day line, which is shorter than the title. */
+.stage-pill {
+  position: relative;
+  padding: 6px 10px;
+  background-color: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(44,34,24,.08), 0 3px 8px rgba(44,34,24,.07);
+  transition: transform .12s, box-shadow .2s;
+}
+.stage-pill.here { background-color: #E6EADF; }
+.stage-pill.open { box-shadow: 0 1px 2px rgba(44,34,24,.08), 0 3px 8px rgba(44,34,24,.07); }
+.stage-pill:hover { box-shadow: 0 2px 4px rgba(44,34,24,.1), 0 6px 14px rgba(44,34,24,.1); }
+.stage-pill:active { transform: scale(.98); box-shadow: 0 1px 2px rgba(44,34,24,.1); }
+.stage-chev {
+  position: absolute;
+  bottom: 8px;
+  right: 7px;
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: var(--moss);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .2s;
+}
+.stage-pill.open .stage-chev { transform: rotate(180deg); }
