@@ -55,6 +55,9 @@ const Stretch = (() => {
 
   const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
+  // Phase 2 routines are faded while you're still in Phase 1 (they still start if tapped).
+  const notYet = (r) => r.fromDay >= PHASE_TWO_DAY && Phase.of() === 1;
+
   // Which phase a routine belongs to, and how far off it is if you're not there yet.
   function phaseTag(r) {
     const phase2 = r.fromDay >= PHASE_TWO_DAY;
@@ -151,7 +154,8 @@ const Stretch = (() => {
       const badge = badgeFor(today[r.id] || 0, targets[r.id] || 0) || "<span></span>";
       const blurb = typeof r.blurb === "function" ? r.blurb(opts) : r.blurb;
       return `
-        <button class="routine" data-id="${r.id}" aria-label="Start ${r.name}">
+        <button class="routine${notYet(r) ? " not-yet" : ""}" data-id="${r.id}"
+          aria-label="Start ${r.name}">
           <span class="routine-name">${r.name}</span>
           <span class="routine-when">${r.when}</span>
           <span class="routine-blurb">${blurb}</span>

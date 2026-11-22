@@ -1032,3 +1032,5 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
   font-weight: 500;
   white-space: nowrap;
 }
+.routine.not-yet { opacity: .5; }
+.routine.not-yet:hover { opacity: .8; }
