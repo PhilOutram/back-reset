@@ -58,6 +58,8 @@ const EXERCISES = {
     tip: "One knee bent, hands under your arch. Lift head and shoulders 1-2 inches only.",
     say: "Modified curl up. Lie on your back, one knee bent, hands under your lower back. " +
          "Brace lightly and lift just your head and shoulders.",
+    // Not left/right sides but a leg swap halfway: first set one way, the rest the other.
+    halves: ["Right knee bent", "Left knee bent"],
   },
   sidePlank: {
     name: "Side Plank",
@@ -151,13 +153,17 @@ function timed(ex, secs, leadIn, label = "") {
 }
 
 // McGill "Russian pyramid": e.g. 3 holds, rest, 2 holds, rest, 1 hold - each side.
-function pyramid(ex, opts, leadIn, restSay) {
+// An exercise with `halves` (the curl-up) swaps legs once, after the first set, so a 3-2-1
+// pyramid comes out 3 reps each way.
+function pyramid(ex, opts, leadIn) {
   const e = EXERCISES[ex];
   const sets = PYRAMIDS[opts.pyramid] || PYRAMIDS["3-2-1"];
   const sides = e.sides || [null];
   const out = [];
   sets.forEach((reps, setIdx) => {
-    sides.forEach((side, sideIdx) => {
+    const half = e.halves ? e.halves[setIdx === 0 ? 0 : 1] : null;
+    sides.forEach((s, sideIdx) => {
+      const side = s || half;
       if (setIdx === 0 && sideIdx === 0) out.push(intro(ex, leadIn, side));
       else if (sideIdx > 0) out.push(switchSide(ex, side));
       for (let r = 1; r <= reps; r++) {
@@ -167,11 +173,13 @@ function pyramid(ex, opts, leadIn, restSay) {
       }
     });
     if (setIdx < sets.length - 1) {
-      const next = sides[0] ? ` Next: ${sides[0]}.` : "";
+      const nextHalf = e.halves ? e.halves[1] : null;
+      const nextSide = sides[0] || nextHalf;
+      const swap = e.halves && setIdx === 0 ? " Swap legs." : "";
       out.push(seg(ex, "rest", opts.restSecs, {
-        side: sides[0],
+        side: nextSide,
         label: `Rest before set ${setIdx + 2}`,
-        say: (restSay || "Rest.") + next,
+        say: `Rest.${swap}` + (nextSide ? ` Next: ${nextSide}.` : ""),
       }));
     }
   });
@@ -184,7 +192,7 @@ const ROUTINES = [
     id: "release",
     name: "Back Release",
     when: "Twice a day, once warmed up · and before bed",
-    blurb: "Sphinx, mid-range cat-cow, hip rotation, then 5 minutes of legs-up rest.",
+    blurb: "Sphinx, mid-range cat-cow, hip rotation each side, then 5 minutes of legs-up rest.",
     build: () => [
       ...timed("sphinx", 90, LEAD_IN_FIRST),
       ...timed("catCow", 60, LEAD_IN),
@@ -198,7 +206,7 @@ const ROUTINES = [
     when: "Once a day, mid-day · not in the first hour after waking",
     blurb: "Short braced holds in a pyramid. Breathe behind the brace, stop if it pinches.",
     build: (opts) => [
-      ...pyramid("curlUp", opts, LEAD_IN_FIRST, "Rest. Swap which knee is bent."),
+      ...pyramid("curlUp", opts, LEAD_IN_FIRST),
       ...pyramid("sidePlank", opts, LEAD_IN),
       ...pyramid("birdDog", opts, LEAD_IN),
     ],

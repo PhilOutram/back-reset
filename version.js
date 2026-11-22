@@ -1,10 +1,18 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.02";
+const VERSION = "v0.03";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.03",
+    date: "2026-11-22",
+    notes: [
+      "Curl-up swaps legs once, after the first set, so both legs get the same reps.",
+      "Back Release card now says the hip rotation is done on each side.",
+    ],
+  },
   {
     version: "v0.02",
     date: "2026-11-22",
