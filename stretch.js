@@ -16,6 +16,7 @@ const Stretch = (() => {
     timed: "Breathe",
     hold:  "Hold",
     relax: "Relax",
+    switch: "Switch",
     rest:  "Rest",
   };
 
@@ -169,6 +170,10 @@ const Stretch = (() => {
         Sound.seq([[523, 0]], 0.16);
         Voice.speak("Relax");
         break;
+      case "switch":
+        Sound.seq([[523, 0]], 0.16);
+        Voice.speak(s.say || "Switch");
+        break;
       case "rest":
         Sound.seq([[523, 0], [440, 0.2]], 0.16);
         Voice.speak(s.say || "Rest");
@@ -179,7 +184,7 @@ const Stretch = (() => {
   // Count-in pips for the segments that lead into effort.
   function cueTick(s, left) {
     if (!COUNT_IN.includes(left)) return;
-    if (s.kind === "ready" || s.kind === "rest" || s.kind === "relax") {
+    if (["ready", "rest", "relax", "switch"].includes(s.kind)) {
       Sound.pip(left === 1 ? 740 : 600, 0.13);
     }
   }

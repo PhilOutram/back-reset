@@ -9,6 +9,7 @@
      timed - one continuous hold / movement
      hold  - a McGill-style short hold (8-10 s)
      relax - the brief reset between holds
+     switch - the quick change to the other side between alternating holds
      rest  - the longer rest between pyramid sets
    ============================================================ */
 
@@ -17,6 +18,9 @@ const LEAD_IN       = 6;    // seconds between exercises
 const MOVE_SECS     = 20;   // seconds for a change of position (floor <-> standing etc.)
 const SWITCH_SECS   = 5;    // seconds to swap sides (an exercise can set switchSecs)
 const RELAX_SECS    = 3;    // reset between two holds of the same set
+const ALT_SWITCH_SECS = 3;  // change sides between alternating holds (curl-up, bird-dog)
+const REST_STEP     = 5;    // each rest in a pyramid is this much shorter than the last
+const REST_MIN      = 10;
 
 const EXERCISES = {
   standingExt: {
@@ -127,8 +131,9 @@ const EXERCISES = {
     tip: "One knee bent, hands under your arch. Lift head and shoulders 1-2 inches only.",
     say: "Modified curl up. Lie on your back, one knee bent, hands under your lower back. " +
          "Brace lightly and lift just your head and shoulders.",
-    // Not left/right sides but a leg swap halfway: first set one way, the rest the other.
-    halves: ["Right knee bent", "Left knee bent"],
+    // The bent knee swaps on every hold.
+    sides: ["Right knee bent", "Left knee bent"],
+    alternate: true,
   },
   sidePlank: {
     name: "Side Plank",
@@ -147,6 +152,7 @@ const EXERCISES = {
     say: "Bird dog. On hands and knees with a flat back, reach one arm forward and the " +
          "opposite leg back.",
     sides: ["Right arm, left leg", "Left arm, right leg"],
+    alternate: true,
   },
   hipSwitch: {
     name: "90/90 Hip Switches",
@@ -231,34 +237,45 @@ function timed(ex, secs, leadIn, opts = {}) {
   ];
 }
 
-// McGill "Russian pyramid": e.g. 3 holds, rest, 2 holds, rest, 1 hold - each side.
-// An exercise with `halves` (the curl-up) swaps legs once, after the first set, so a 3-2-1
-// pyramid comes out 3 reps each way.
+// McGill "Russian pyramid": e.g. 3 holds, rest, 2 holds, rest, 1 hold - on each side.
+// Exercises marked `alternate` (curl-up, bird-dog) swap sides on every hold - R L R L R L -
+// so each side rests while the other works. The side plank stays in blocks (L L L, then
+// R R R), because changing sides means rolling over and that is the move that hurts.
+// Rests shrink through the pyramid (20 s, then 15 s): less work done, less rest needed.
+// After the last set the move to the next exercise is the rest.
 function pyramid(ex, opts, leadIn, how = null) {
   const e = EXERCISES[ex];
   const sets = PYRAMIDS[opts.pyramid] || PYRAMIDS["3-2-1"];
   const sides = e.sides || [null];
   const out = [];
+  const hold = (side, label) => out.push(seg(ex, "hold", opts.holdSecs, { side, label }));
   sets.forEach((reps, setIdx) => {
-    const half = e.halves ? e.halves[setIdx === 0 ? 0 : 1] : null;
-    sides.forEach((s, sideIdx) => {
-      const side = s || half;
-      if (setIdx === 0 && sideIdx === 0) out.push(intro(ex, leadIn, side, how));
-      else if (sideIdx > 0) out.push(switchSide(ex, side));
+    const label = (r) => `Set ${setIdx + 1} of ${sets.length} · Rep ${r} of ${reps}`;
+    if (setIdx === 0) out.push(intro(ex, leadIn, sides[0], how));
+    if (e.alternate) {
       for (let r = 1; r <= reps; r++) {
-        const label = `Set ${setIdx + 1} of ${sets.length} · Rep ${r} of ${reps}`;
-        out.push(seg(ex, "hold", opts.holdSecs, { side, label }));
-        if (r < reps) out.push(seg(ex, "relax", RELAX_SECS, { side, label }));
+        sides.forEach((side, sideIdx) => {
+          if (r > 1 || sideIdx > 0) {
+            out.push(seg(ex, "switch", ALT_SWITCH_SECS, { side, label: label(r), say: side }));
+          }
+          hold(side, label(r));
+        });
       }
-    });
+    } else {
+      sides.forEach((side, sideIdx) => {
+        if (sideIdx > 0) out.push(switchSide(ex, side));
+        for (let r = 1; r <= reps; r++) {
+          hold(side, label(r));
+          if (r < reps) out.push(seg(ex, "relax", RELAX_SECS, { side, label: label(r) }));
+        }
+      });
+    }
     if (setIdx < sets.length - 1) {
-      const nextHalf = e.halves ? e.halves[1] : null;
-      const nextSide = sides[0] || nextHalf;
-      const swap = e.halves && setIdx === 0 ? " Swap legs." : "";
-      out.push(seg(ex, "rest", opts.restSecs, {
-        side: nextSide,
+      const secs = Math.max(REST_MIN, opts.restSecs - setIdx * REST_STEP);
+      out.push(seg(ex, "rest", secs, {
+        side: sides[0],
         label: `Rest before set ${setIdx + 2}`,
-        say: `Rest.${swap}` + (nextSide ? ` Next: ${nextSide}.` : ""),
+        say: "Rest." + (sides[0] ? ` Next: ${sides[0]}.` : ""),
       }));
     }
   });

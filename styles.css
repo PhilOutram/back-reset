@@ -855,3 +855,4 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
 .pain-where-row .field { flex: 1; min-width: 0; }
 .pain-mini { flex: 0 0 auto; width: 64px; height: 96px; }
 .pain-mini[hidden] { display: none; }
+.play[data-kind="switch"] { --phase: var(--moss-light); }

@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.08">
+  <meta name="app-version" content="v0.09">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.08">
+  <link rel="stylesheet" href="styles.css?v=0.09">
 </head>
 <body>
 <div class="app">
@@ -257,6 +257,8 @@
         <ul>
           <li><strong>Back Release</strong> - the Phase 1 set: extensions, Sphinx, cat-cow, hip rotation, glute bridges and a short legs-up rest. Twice a day once you're warmed up.</li>
           <li><strong>McGill Big 3</strong> - short braced holds in a 3-2-1 pyramid, once a day mid-day. Switch to 5-3-1 in Settings once it's pain-free.</li>
+          <li>Curl-ups and bird-dogs alternate sides on every hold (right, left, right, left...), so each side rests while the other works. Side planks stay in blocks - all the left holds, then all the right - so you only roll over once per set.</li>
+          <li>Rests shrink as the sets get smaller: 20 s after the first set, 15 s after the second.</li>
           <li><strong>Bending Return</strong> - from about day 10, gently brings forward bending back so a low hockey crouch stops feeling risky. Stop at mild discomfort.</li>
           <li><strong>Hips &amp; Mid-Back</strong> - Phase 2 extras for when the stiffness has eased, including leg work for skiing.</li>
           <li>Each exercise starts with time to get into position, and tells you how to get there the easy way. Tap Pause if you need longer.</li>
@@ -326,7 +328,7 @@
           <button data-val="10">10 s</button>
         </div>
         <div class="choice-group" data-opt="restSecs">
-          <span class="choice-label">Rest between sets</span>
+          <span class="choice-label">First rest <small>then 5 s shorter</small></span>
           <button data-val="20">20 s</button>
           <button data-val="30">30 s</button>
         </div>
@@ -337,7 +339,7 @@
 
 </div>
 
-<script src="version.js?v=0.08"></script>
+<script src="version.js?v=0.09"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -352,12 +354,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.08"></script>
-<script src="routines.js?v=0.08"></script>
-<script src="stretch.js?v=0.08"></script>
-<script src="desk.js?v=0.08"></script>
-<script src="pain.js?v=0.08"></script>
-<script src="log.js?v=0.08"></script>
-<script src="app.js?v=0.08"></script>
+<script src="core.js?v=0.09"></script>
+<script src="routines.js?v=0.09"></script>
+<script src="stretch.js?v=0.09"></script>
+<script src="desk.js?v=0.09"></script>
+<script src="pain.js?v=0.09"></script>
+<script src="log.js?v=0.09"></script>
+<script src="app.js?v=0.09"></script>
 </body>
 </html>

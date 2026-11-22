@@ -1,10 +1,21 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.08";
+const VERSION = "v0.09";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.09",
+    date: "2026-11-22",
+    notes: [
+      "Big 3: curl-ups and bird-dogs now alternate sides on every hold (R L R L R L), so " +
+        "each side rests while the other works; side planks stay in blocks so you roll " +
+        "over once per set.",
+      "Curl-up gets the full pyramid on each leg, like the other two. Rests shrink as the " +
+        "sets get smaller: 20 s, then 15 s.",
+    ],
+  },
   {
     version: "v0.08",
     date: "2026-11-22",
