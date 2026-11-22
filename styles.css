@@ -21,6 +21,10 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Reserve the scrollbar's space so opening a phase or switching tabs doesn't slide the page
+   sideways. It must be on html: the page scrolls on the root, so on body it does nothing. */
+html { scrollbar-gutter: stable; }
+
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
   background-color: var(--cream);
@@ -29,7 +33,6 @@ body {
   min-height: 100dvh;
   display: flex;
   justify-content: center;
-  scrollbar-gutter: stable;
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -1,10 +1,17 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.19";
+const VERSION = "v0.20";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.20",
+    date: "2026-11-22",
+    notes: [
+      "The page no longer slides sideways when a phase opens and the scrollbar appears.",
+    ],
+  },
   {
     version: "v0.19",
     date: "2026-11-22",
