@@ -283,12 +283,27 @@ function pyramid(ex, opts, leadIn, how = null) {
   return out;
 }
 
+/* ── Phases ───────────────────────────────────────────────────
+   The recovery plan in two phases, counted by the day number at the top.
+   Moving on is manual: nothing switches by itself on Day 10. */
+const PHASE_TWO_DAY = 10;
+const PHASES = [
+  { n: 1, fromDay: 1, name: "Phase 1 · Calm it down",
+    plan: "Back Release twice a day and the Big 3 once a day." },
+  { n: 2, fromDay: PHASE_TWO_DAY, name: "Phase 2 · Rebuild",
+    plan: "Keep both going and add Bending Return and Hips & Mid-Back once a day. Move " +
+          "the Big 3 to 5-3-1 (Settings) once it's pain-free." },
+];
+const phaseOfDay = (n) => (n >= PHASE_TWO_DAY ? PHASES[1] : PHASES[0]);
+
 /* ── Routines ────────────────────────────────────────────────── */
 const ROUTINES = [
   {
     id: "release",
     name: "Back Release",
-    when: "Twice a day, once warmed up · and before bed",
+    short: "Release",
+    fromDay: 1,
+    when: "Twice a day, once warmed up, and once before bed",
     blurb: "Standing extensions, mid-range cat-cow, Sphinx, hip rotation each side, glute " +
            "bridges, then 2 minutes of legs-up rest. Always moving downwards.",
     // Ordered standing -> hands and knees -> front -> back, so every change of position
@@ -314,7 +329,10 @@ const ROUTINES = [
   {
     id: "big3",
     name: "McGill Big 3",
-    when: "Once a day, mid-day · not in the first hour after waking",
+    short: "Big 3",
+    fromDay: 1,
+    when: "Once a day, mid-day, not in the first hour after waking. 3-2-1 holds; 5-3-1 " +
+          "once pain-free",
     blurb: "Short braced holds in a pyramid. Breathe behind the brace, stop if it pinches.",
     build: (opts) => [
       ...pyramid("curlUp", opts, MOVE_SECS, "Get down the easy way and lie on your back."),
@@ -326,8 +344,9 @@ const ROUTINES = [
   {
     id: "flexion",
     name: "Bending Return",
-    when: "From day 10 · stop at mild discomfort",
-    fromDay: 10,
+    short: "Bending",
+    fromDay: PHASE_TWO_DAY,
+    when: "Once a day · stop at mild discomfort",
     blurb: "Gently brings forward bending back: full cat-cow, knee hugs and slow roll-downs, " +
            "finishing with extensions.",
     build: () => [
@@ -347,8 +366,9 @@ const ROUTINES = [
   {
     id: "mobility",
     name: "Hips & Mid-Back",
-    when: "Phase 2 · from day 10, once the stiffness has eased",
-    fromDay: 10,
+    short: "Hips",
+    fromDay: PHASE_TWO_DAY,
+    when: "Once a day, once the stiffness has eased",
     blurb: "Hip switches, open book, dowel hinge, Pallof press, split squats and a wall sit. " +
            "Needs a stick and a band.",
     build: () => [

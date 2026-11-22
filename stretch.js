@@ -23,7 +23,7 @@ const Stretch = (() => {
   const $ = (id) => document.getElementById(id);
   const els = {
     pick: $("pickScreen"), play: $("playArea"), done: $("doneScreen"),
-    list: $("routineList"), begin: $("beginBtn"),
+    list: $("routineList"), begin: $("beginBtn"), plan: $("planNote"),
     exCount: $("exCount"), poseImg: $("poseImg"), pose: $("pose"),
     ring: $("timerRing"), num: $("timerNum"), pill: $("phasePill"),
     name: $("exName"), side: $("exSide"), label: $("exLabel"), tip: $("exTip"),
@@ -52,12 +52,24 @@ const Stretch = (() => {
     return History.day()[id];
   }
 
-  // Routines meant for later in recovery say how far off that is.
-  function dayHint(r) {
-    if (!r.fromDay) return "";
+  // Which phase a routine belongs to, and how far off it is if it hasn't started yet.
+  function phaseTag(r) {
     const left = r.fromDay - Targets.dayNumber();
-    if (left <= 0) return "";
-    return ` <span class="day-hint">· ${left} day${left === 1 ? "" : "s"} to go</span>`;
+    const phases = r.fromDay >= PHASE_TWO_DAY ? "Phase 2" : "Phases 1 and 2";
+    const hint = left > 0 ?
+      ` <span class="day-hint">· starts in ${left} day${left === 1 ? "" : "s"}</span>` : "";
+    return `<span class="routine-phase">From Day ${r.fromDay} · ${phases}${hint}</span>`;
+  }
+
+  // The two-phase plan above the cards, with today's phase picked out.
+  function renderPlan() {
+    const now = phaseOfDay(Targets.dayNumber());
+    els.plan.innerHTML = PHASES.map((p, i) => {
+      const to = PHASES[i + 1] ? `-${PHASES[i + 1].fromDay - 1}` : " on";
+      return `<p class="${p === now ? "now" : ""}"><b>${p.name}</b> ` +
+        `<span>Day ${p.fromDay}${to}${p === now ? " · you are here" : ""}</span><br>` +
+        `${p.plan}</p>`;
+    }).join("");
   }
 
   function badgeFor(n, target) {
@@ -70,6 +82,7 @@ const Stretch = (() => {
 
   /* ── Routine picker ────────────────────────────────────────── */
   function renderPicker() {
+    renderPlan();
     const today = History.day();
     const targets = Targets.get();
     const opts = Store.get("big3", {});
@@ -80,7 +93,8 @@ const Stretch = (() => {
         <button class="routine ${r.id === selected ? "selected" : ""}" data-id="${r.id}">
           <span class="routine-head"><span class="routine-name">${r.name}</span>
             <span class="routine-mins">${mins} min</span></span>
-          <span class="routine-when">${r.when}${dayHint(r)}</span>
+          ${phaseTag(r)}
+          <span class="routine-when">${r.when}</span>
           <span class="routine-blurb">${r.blurb}</span>
           ${badge}
         </button>`;

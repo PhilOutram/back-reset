@@ -6,12 +6,9 @@
 const Log = (() => {
   const MAX_TARGET = 4;
   const SECS_PER_MIN = 60;
-  const COLS = [
-    { id: "release",  head: "Ph 1" },
-    { id: "big3",     head: "Big 3" },
-    { id: "flexion",  head: "Bend" },
-    { id: "mobility", head: "Ph 2" },
-  ];
+  // One column per routine, headed with the same short name as its card.
+  const COLS = ROUTINES.map((r) => ({ id: r.id, head: r.short }));
+  const TABLE_COLS = COLS.length + 4;   // Day, Date, the routines, Pain, Desk
 
   const $ = (id) => document.getElementById(id);
   const els = {
@@ -39,7 +36,7 @@ const Log = (() => {
   function deskCell(d) {
     const parts = [mins(d.stand), mins(d.sit), mins(d.move)];
     if (!parts.some(Boolean)) return '<td class="none desk">–</td>';
-    return `<td class="desk">${parts.join(" / ")}</td>`;
+    return `<td class="desk">${parts.join("/")}</td>`;
   }
 
   // Every day from Day 1 (or the first recorded day, if earlier) up to today.
@@ -87,11 +84,18 @@ const Log = (() => {
     const all = History.all();
     const head = '<thead><tr><th>Day</th><th>Date</th>' +
       COLS.map((c) => `<th>${c.head}</th>`).join("") + "<th>Pain</th><th>Desk</th></tr></thead>";
+    let lastPhase = null;
     const rows = dayKeys().map((key) => {
       const d = all[key] || {};
       const n = daysBetween(Targets.dayOne(), key) + 1;
       const isToday = key === todayKey() ? ' class="today-row"' : "";
-      return `<tr${isToday}><td class="num">${n > 0 ? n : "–"}</td><td>${shortDate(key)}</td>` +
+      // A heading row at the top of each phase's block of days (newest first).
+      const phase = n > 0 ? phaseOfDay(n) : null;
+      const phaseRow = phase && phase !== lastPhase ?
+        `<tr class="phase-row"><td colspan="${TABLE_COLS}">${phase.name}</td></tr>` : "";
+      lastPhase = phase;
+      return `${phaseRow}<tr${isToday}><td class="num">${n > 0 ? n : "–"}</td>` +
+        `<td>${shortDate(key)}</td>` +
         COLS.map((c) => cell(d[c.id] || 0, targets[c.id])).join("") + painCell(key) +
         deskCell(d) + "</tr>";
     });

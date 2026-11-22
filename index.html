@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.10">
+  <meta name="app-version" content="v0.11">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.10">
+  <link rel="stylesheet" href="styles.css?v=0.11">
 </head>
 <body>
 <div class="app">
@@ -48,6 +48,7 @@
 
       <!-- Pick a routine -->
       <div class="screen pick visible" id="pickScreen">
+        <div class="plan-note" id="planNote"></div>
         <div class="routine-list" id="routineList"></div>
         <button class="btn btn-main" id="beginBtn">Begin</button>
         <p class="fine">Keeps the screen on while you stretch.</p>
@@ -196,7 +197,7 @@
       </div>
       <div class="target-row" id="targetRow"></div>
       <div class="log-table-wrap"><table class="log-table" id="logTable"></table></div>
-      <p class="fine log-legend">Ph 1 = Back Release · Bend = Bending Return · Ph 2 = Hips &amp; Mid-Back · Pain = worst logged that day · Desk = minutes stood / sat / moved</p>
+      <p class="fine log-legend">Columns use the routine names from the Stretches tab. Pain = worst logged that day · Desk = minutes stood / sat / moved</p>
     </div>
 
     <details class="desk-settings" id="logSettings">
@@ -253,14 +254,21 @@
     <div class="modal" role="dialog" aria-labelledby="helpTitle">
       <div class="modal-head"><h2 id="helpTitle">How it works</h2><button class="modal-close" data-close>&times;</button></div>
       <div class="modal-body">
+        <h3>The plan</h3>
+        <ul>
+          <li><strong>Phase 1 · Calm it down (Day 1-9)</strong> - Back Release twice a day and the McGill Big 3 once a day.</li>
+          <li><strong>Phase 2 · Rebuild (Day 10 on)</strong> - keep both going and add Bending Return and Hips &amp; Mid-Back once a day.</li>
+          <li>Nothing changes by itself on Day 10: the Stretches tab shows which phase you're in, and you choose what to do. Move the Big 3 from 3-2-1 to 5-3-1 in Settings once it's pain-free - that goes by how it feels, not by the day.</li>
+          <li>Daily targets (Log tab) are one set for every day. Raise the Bending Return and Hips &amp; Mid-Back targets when you start Phase 2.</li>
+        </ul>
         <h3>Stretches</h3>
         <ul>
-          <li><strong>Back Release</strong> - the Phase 1 set: extensions, Sphinx, cat-cow, hip rotation, glute bridges and a short legs-up rest. Twice a day once you're warmed up.</li>
+          <li><strong>Back Release</strong> - extensions, Sphinx, cat-cow, hip rotation, glute bridges and a short legs-up rest. Twice a day once you're warmed up, in both phases.</li>
           <li><strong>McGill Big 3</strong> - short braced holds in a 3-2-1 pyramid, once a day mid-day. Switch to 5-3-1 in Settings once it's pain-free.</li>
           <li>Curl-ups and bird-dogs alternate sides on every hold (right, left, right, left...), so each side rests while the other works. Side planks stay in blocks - all the left holds, then all the right - so you only roll over once per set.</li>
           <li>Rests shrink as the sets get smaller: 20 s after the first set, 15 s after the second.</li>
-          <li><strong>Bending Return</strong> - from about day 10, gently brings forward bending back so a low hockey crouch stops feeling risky. Stop at mild discomfort.</li>
-          <li><strong>Hips &amp; Mid-Back</strong> - Phase 2 extras for when the stiffness has eased, including leg work for skiing.</li>
+          <li><strong>Bending Return</strong> - Phase 2, from Day 10. Gently brings forward bending back so a low hockey crouch stops feeling risky. Stop at mild discomfort.</li>
+          <li><strong>Hips &amp; Mid-Back</strong> - Phase 2, from Day 10, once the stiffness has eased. Includes leg work for skiing.</li>
           <li>Each exercise starts with time to get into position, and tells you how to get there the easy way. Tap Pause if you need longer.</li>
           <li>Moving exercises are paced: the word on screen (e.g. <strong>Arch</strong> / <strong>Round</strong>) changes with a soft pip, so you move with the rhythm rather than holding. Mute the voice to keep just the pips.</li>
           <li>Back Release always moves downhill - standing, then hands and knees, then your front, then your back - so you never push up off the floor between exercises.</li>
@@ -339,7 +347,7 @@
 
 </div>
 
-<script src="version.js?v=0.10"></script>
+<script src="version.js?v=0.11"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -354,12 +362,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.10"></script>
-<script src="routines.js?v=0.10"></script>
-<script src="stretch.js?v=0.10"></script>
-<script src="desk.js?v=0.10"></script>
-<script src="pain.js?v=0.10"></script>
-<script src="log.js?v=0.10"></script>
-<script src="app.js?v=0.10"></script>
+<script src="core.js?v=0.11"></script>
+<script src="routines.js?v=0.11"></script>
+<script src="stretch.js?v=0.11"></script>
+<script src="desk.js?v=0.11"></script>
+<script src="pain.js?v=0.11"></script>
+<script src="log.js?v=0.11"></script>
+<script src="app.js?v=0.11"></script>
 </body>
 </html>
