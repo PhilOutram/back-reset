@@ -8,13 +8,14 @@
 
   /* ── Tabs ──────────────────────────────────────────────────── */
   const tabs = document.querySelectorAll(".tab");
-  const views = { stretch: $("stretchView"), desk: $("deskView") };
+  const views = { stretch: $("stretchView"), desk: $("deskView"), log: $("logView") };
 
   function showView(name) {
     tabs.forEach((t) => t.classList.toggle("active", t.dataset.view === name));
     Object.entries(views).forEach(([k, v]) => v.classList.toggle("visible", k === name));
     Store.set("view", name);
     if (name === "desk") Desk.render();
+    if (name === "log") Log.render();
   }
   tabs.forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
   showView(Store.get("view", "stretch"));

@@ -182,27 +182,90 @@ const Notify = {
   },
 };
 
-/* ── Screen wake lock (stretch routines only) ────────────────── */
+/* ── Screen wake lock ────────────────────────────────────────────
+   Shared by the stretch player and (optionally) the desk timer, so it is held while
+   ANY owner wants it - one finishing must not switch the screen off under the other. */
 const Wake = (() => {
   let lock = null;
-  let wanted = false;
+  const owners = new Set();
 
-  async function on() {
-    wanted = true;
+  async function grab() {
     if (!("wakeLock" in navigator) || (lock && !lock.released)) return;
     try { lock = await navigator.wakeLock.request("screen"); } catch (e) {}
   }
 
-  async function off() {
-    wanted = false;
+  function on(owner) {
+    owners.add(owner);
+    grab();
+  }
+
+  async function off(owner) {
+    owners.delete(owner);
+    if (owners.size) return;
     try { await lock?.release(); } catch (e) {}
     lock = null;
   }
 
   // The OS drops the lock whenever the page is hidden; take it back on return.
   document.addEventListener("visibilitychange", () => {
-    if (wanted && document.visibilityState === "visible") on();
+    if (owners.size && document.visibilityState === "visible") grab();
   });
 
-  return { on, off };
+  return { on, off, supported: "wakeLock" in navigator };
 })();
+
+/* ── Platform ────────────────────────────────────────────────── */
+// iPadOS reports itself as a Mac, so a touch-capable "Mac" counts too.
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+/* ── Daily history and targets ───────────────────────────────────
+   One record per local date: routine counts (release / big3 / mobility) and desk
+   seconds (stand / sit / move). Kept in memory and written back on save(). */
+const HISTORY_KEEP_DAYS = 400;
+const MS_PER_DAY        = 24 * 60 * 60 * MS_PER_SEC;
+const DEFAULT_TARGETS   = { release: 2, big3: 1, mobility: 0 };
+const DEFAULT_DAY_ONE   = "2026-11-15";   // the day the back first locked up
+
+function parseDay(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function dayKeyOf(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-` +
+         String(date.getDate()).padStart(2, "0");
+}
+function daysBetween(fromKey, toKey) {
+  return Math.round((parseDay(toKey) - parseDay(fromKey)) / MS_PER_DAY);
+}
+
+const History = (() => {
+  let data = Store.get("history", {});
+
+  function day(key = todayKey()) {
+    if (!data[key]) data[key] = {};
+    return data[key];
+  }
+
+  function add(field, n, key = todayKey()) {
+    const d = day(key);
+    d[field] = (d[field] || 0) + n;
+  }
+
+  function save() {
+    const keys = Object.keys(data).sort();
+    keys.slice(0, Math.max(0, keys.length - HISTORY_KEEP_DAYS)).forEach((k) => delete data[k]);
+    Store.set("history", data);
+    document.dispatchEvent(new CustomEvent("history:changed"));
+  }
+
+  return { day, add, save, all: () => data };
+})();
+
+const Targets = {
+  get() { return { ...DEFAULT_TARGETS, ...Store.get("targets", {}) }; },
+  set(t) { Store.set("targets", t); },
+  dayOne() { return Store.get("dayOne", DEFAULT_DAY_ONE); },
+  setDayOne(key) { Store.set("dayOne", key); },
+  dayNumber(key = todayKey()) { return daysBetween(this.dayOne(), key) + 1; },
+};

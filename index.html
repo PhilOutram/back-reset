@@ -6,6 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
+  <meta name="app-version" content="v0.02">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -15,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.01">
+  <link rel="stylesheet" href="styles.css?v=0.02">
 </head>
 <body>
 <div class="app">
@@ -36,7 +37,8 @@
 
   <nav class="tabs" role="tablist">
     <button class="tab active" data-view="stretch" role="tab">Stretches</button>
-    <button class="tab" data-view="desk" role="tab">Desk timer <span class="live-dot" id="deskDot"></span></button>
+    <button class="tab" data-view="desk" role="tab">Desk <span class="live-dot" id="deskDot"></span></button>
+    <button class="tab" data-view="log" role="tab">Log</button>
   </nav>
 
   <!-- ═══ STRETCHES ═══ -->
@@ -112,6 +114,12 @@
 
   <!-- ═══ DESK TIMER ═══ -->
   <section class="view" id="deskView">
+    <p class="ios-note" id="iosNote" hidden>
+      <span class="warn"><strong>iPhone:</strong> iOS pauses web pages when the screen locks, so
+        the beeps stop. Turn on <strong>Keep screen on</strong> in Timings below.</span>
+      <span class="okmsg"><strong>iPhone:</strong> the screen stays on while the timer runs, as
+        the beeps stop if it locks. Best on charge.</span>
+    </p>
     <div class="card desk-card" id="deskCard" data-phase="idle">
       <div class="phase-strip" id="phaseStrip"></div>
 
@@ -150,6 +158,10 @@
           <option value="10">Every 10 min</option>
         </select>
       </label>
+      <label class="toggle-row" id="awakeRow">
+        <span><strong>Keep screen on</strong><small>While the timer runs. Needed on iPhone; uses more battery</small></span>
+        <input type="checkbox" id="awakeChk">
+      </label>
       <label class="toggle-row">
         <span><strong>Notifications</strong><small>Shown when the phone is asleep or you're in another app</small></span>
         <input type="checkbox" id="notifyChk">
@@ -157,6 +169,28 @@
     </details>
 
     <p class="today" id="deskToday"></p>
+  </section>
+
+  <!-- ═══ LOG ═══ -->
+  <section class="view" id="logView">
+    <div class="card log-card">
+      <div class="log-head">
+        <span class="log-day" id="logDay"></span>
+        <span class="log-date" id="logDate"></span>
+      </div>
+      <div class="target-row" id="targetRow"></div>
+      <div class="log-table-wrap"><table class="log-table" id="logTable"></table></div>
+      <p class="fine log-legend">Ph 1 = Back Release · Ph 2 = Hips &amp; Mid-Back · Desk = minutes stood / sat / moved</p>
+    </div>
+
+    <details class="desk-settings" id="logSettings">
+      <summary>Daily targets <span id="targetSummary"></span></summary>
+      <div class="stepper-list" id="targetSteppers"></div>
+      <label class="toggle-row">
+        <span><strong>Day 1</strong><small>The day your back first locked up</small></span>
+        <input type="date" id="dayOneInput">
+      </label>
+    </details>
   </section>
 
   <!-- Help -->
@@ -178,6 +212,13 @@
           <li>Each change gets a short beep-beep - rising for stand, falling for sit, three notes for move.</li>
           <li>It keeps working with the screen off: leave this page open (don't swipe it away) and the phone can sleep.</li>
           <li>Tap a position in the strip to jump straight to it, e.g. if you sat down early.</li>
+          <li>On an iPhone the beeps stop when the screen locks, so turn on <strong>Keep screen on</strong>.</li>
+        </ul>
+        <h3>Log</h3>
+        <ul>
+          <li>Every finished routine and every minute of standing, sitting and moving is recorded automatically.</li>
+          <li>Set your daily targets in the Log tab; a cell turns green when the target is met.</li>
+          <li>Days are counted from Day 1, the day your back first locked up.</li>
         </ul>
         <h3>Remember</h3>
         <ul>
@@ -218,11 +259,26 @@
 
 </div>
 
-<script src="version.js?v=0.01"></script>
-<script src="core.js?v=0.01"></script>
-<script src="routines.js?v=0.01"></script>
-<script src="stretch.js?v=0.01"></script>
-<script src="desk.js?v=0.01"></script>
-<script src="app.js?v=0.01"></script>
+<script src="version.js?v=0.02"></script>
+<script>
+  // Stale-script guard: if a cached older version.js answered this newer page, reload
+  // once so the new service worker can serve matching files.
+  (function () {
+    var want = document.querySelector('meta[name="app-version"]').content;
+    var key = "backReset.reloadedFor";
+    if (typeof VERSION === "undefined" || VERSION !== want) {
+      if (sessionStorage.getItem(key) !== want) {
+        sessionStorage.setItem(key, want);
+        setTimeout(function () { location.reload(); }, 600);
+      }
+    }
+  })();
+</script>
+<script src="core.js?v=0.02"></script>
+<script src="routines.js?v=0.02"></script>
+<script src="stretch.js?v=0.02"></script>
+<script src="desk.js?v=0.02"></script>
+<script src="log.js?v=0.02"></script>
+<script src="app.js?v=0.02"></script>
 </body>
 </html>

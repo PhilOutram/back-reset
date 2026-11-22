@@ -67,7 +67,8 @@ const Desk = (() => {
     move:  { min: 0, max: 15, step: 1 },
   };
 
-  const DEFAULT_CFG = { stand: 25, sit: 15, move: 5, nudge: 8, notify: true };
+  // On an iPhone the beeps die when the screen locks, so keep it on by default there.
+  const DEFAULT_CFG = { stand: 25, sit: 15, move: 5, nudge: 8, notify: true, keepAwake: IS_IOS };
 
   const $ = (id) => document.getElementById(id);
   const els = {
@@ -75,26 +76,22 @@ const Desk = (() => {
     phase: $("deskPhase"), time: $("deskTime"), next: $("deskNext"), tip: $("deskTip"),
     banner: $("deskBanner"), start: $("deskStartBtn"), stop: $("deskStopBtn"),
     skip: $("deskSkipBtn"), presets: $("presetRow"), steppers: $("stepperList"),
-    nudge: $("nudgeSel"), notify: $("notifyChk"), summary: $("deskSummary"),
+    nudge: $("nudgeSel"), notify: $("notifyChk"), awake: $("awakeChk"),
+    awakeRow: $("awakeRow"), iosNote: $("iosNote"), summary: $("deskSummary"),
     today: $("deskToday"), dot: $("deskDot"),
   };
 
   let cfg      = { ...DEFAULT_CFG, ...Store.get("deskCfg", {}) };
   let st       = Store.get("deskState", null) || { running: false };
-  let totals   = loadTotals();
   let lastTick = null;
   let lastSave = 0;
   let needsRearm = false;
   let stripKey = "";
 
   /* ── Persistence ───────────────────────────────────────────── */
-  function loadTotals() {
-    const t = Store.get("deskToday", null);
-    return t && t.date === todayKey() ? t : { date: todayKey(), stand: 0, sit: 0, move: 0 };
-  }
   function save() {
     Store.set("deskState", st);
-    Store.set("deskToday", totals);
+    History.save();
     lastSave = Date.now();
   }
   function saveCfg() { Store.set("deskCfg", cfg); }
@@ -205,9 +202,8 @@ const Desk = (() => {
 
   function tick() {
     const now = Date.now();
-    if (totals.date !== todayKey()) totals = loadTotals();
     if (st.running && !st.paused) {
-      if (lastTick) totals[PHASES[st.phase].id] += (now - lastTick) / MS_PER_SEC;
+      if (lastTick) History.add(PHASES[st.phase].id, (now - lastTick) / MS_PER_SEC);
       lastTick = now;
       if (PHASES[st.phase].id === "stand" && st.nextNudgeAt && now >= st.nextNudgeAt) {
         Sound.pip(NUDGE_FREQ, NUDGE_VOL);
@@ -238,10 +234,11 @@ const Desk = (() => {
   }
 
   function renderToday() {
+    const totals = History.day();
     const parts = [];
-    if (totals.stand >= 60) parts.push(`stood ${fmtMins(totals.stand)}`);
-    if (totals.sit >= 60) parts.push(`sat ${fmtMins(totals.sit)}`);
-    if (totals.move >= 60) parts.push(`moved ${fmtMins(totals.move)}`);
+    if ((totals.stand || 0) >= 60) parts.push(`stood ${fmtMins(totals.stand)}`);
+    if ((totals.sit || 0) >= 60) parts.push(`sat ${fmtMins(totals.sit)}`);
+    if ((totals.move || 0) >= 60) parts.push(`moved ${fmtMins(totals.move)}`);
     els.today.textContent = parts.length ? `Today: ${parts.join(" · ")}` : "";
   }
 
@@ -276,6 +273,13 @@ const Desk = (() => {
     els.banner.hidden = !needsRearm;
     els.dot.classList.toggle("on", running && !st.paused);
     renderToday();
+    syncWake();
+  }
+
+  // Optional "keep screen on" while the rotation runs (the only reliable way on iPhone).
+  function syncWake() {
+    if (st.running && !st.paused && cfg.keepAwake) Wake.on("desk");
+    else Wake.off("desk");
   }
 
   function renderSettings() {
@@ -292,6 +296,10 @@ const Desk = (() => {
         <button data-step="1" aria-label="More ${p.name}">+</button>
       </div>`).join("");
     els.nudge.value = String(cfg.nudge);
+    els.awake.checked = !!cfg.keepAwake;
+    els.awakeRow.hidden = !Wake.supported && !IS_IOS;
+    els.iosNote.hidden = !IS_IOS;
+    els.iosNote.classList.toggle("ok", !!cfg.keepAwake);
     els.summary.textContent = `${cfg.stand} / ${cfg.sit} / ${cfg.move}`;
     syncNotifyBox();
     stripKey = "";
@@ -338,6 +346,12 @@ const Desk = (() => {
     cfg.nudge = Number(els.nudge.value);
     saveCfg();
     if (st.running) { resetNudge(); save(); }
+  });
+
+  els.awake.addEventListener("change", () => {
+    cfg.keepAwake = els.awake.checked;
+    saveCfg();
+    renderSettings();
   });
 
   els.notify.addEventListener("change", async () => {

@@ -3,19 +3,17 @@
 // a service worker). It schedules nothing - a service worker cannot wake itself at a
 // set time; the page does the timing.
 //
-// Bump CACHE on every release (keep it in step with version.js). Assets are matched
-// ignoring their ?v= stamp, so this list stays unstamped; a new CACHE name refetches all.
-const CACHE = "back-reset-v0.01";
+// Bump V on every release, in step with version.js and the ?v= stamps in index.html.
+// CSS/JS are cached under their exact stamped URLs: never match ignoring the query, or an
+// old worker hands the new page last release's scripts and it breaks on first open.
+const V = "0.02";
+const CACHE = `back-reset-v${V}`;
+const STAMPED = ["styles.css", "version.js", "core.js", "routines.js", "stretch.js",
+  "desk.js", "log.js", "app.js"].map((f) => `${f}?v=${V}`);
 const ASSETS = [
   ".",
   "index.html",
-  "styles.css",
-  "version.js",
-  "core.js",
-  "routines.js",
-  "stretch.js",
-  "desk.js",
-  "app.js",
+  ...STAMPED,
   "manifest.webmanifest",
   "icon-32.png",
   "icon-192.png",
@@ -70,7 +68,7 @@ self.addEventListener("fetch", (event) => {
   }
   event.respondWith(
     caches.open(CACHE)
-      .then((cache) => cache.match(event.request, { ignoreSearch: true }))
+      .then((cache) => cache.match(event.request))
       .then((hit) => hit || fetch(event.request))
   );
 });

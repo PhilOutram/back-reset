@@ -36,6 +36,9 @@ Served on GitHub Pages at https://philoutram.github.io/back-reset/.
 
 ## Releasing
 
-Bump `VERSION` + prepend a `CHANGELOG` entry in `version.js`, change every `?v=` stamp in
-`index.html` and the `CACHE` name in `sw.js` to match, then run the publish script from the
+Bump `VERSION` + prepend a `CHANGELOG` entry in `version.js`, then change to match: every
+`?v=` stamp and the `app-version` meta in `index.html`, and `V` in `sw.js`. The service worker
+caches CSS/JS under exact stamped URLs - never switch it to `ignoreSearch` (v0.01 did, and the
+first open after an update ran old scripts with new ones). `log.js` is the Log tab;
+`History`/`Targets` in `core.js` hold the per-day record. Then run the publish script from the
 `new-mini-app` skill. New files the app needs offline go in `ASSETS` in `sw.js`.

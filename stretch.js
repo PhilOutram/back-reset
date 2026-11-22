@@ -43,26 +43,29 @@ const Stretch = (() => {
 
   els.ring.style.strokeDasharray = RING_CIRC;
 
-  /* ── Today's tally ─────────────────────────────────────────── */
-  function tally() {
-    const log = Store.get("stretchLog", {});
-    return log.date === todayKey() ? log : { date: todayKey() };
-  }
+  /* ── Today's tally (recorded in History, shown in the Log tab) ─ */
   function bumpTally(id) {
-    const log = tally();
-    log[id] = (log[id] || 0) + 1;
-    Store.set("stretchLog", log);
-    return log[id];
+    History.add(id, 1);
+    History.save();
+    return History.day()[id];
+  }
+
+  function badgeFor(n, target) {
+    if (target > 0) {
+      const met = n >= target ? " met" : "";
+      return `<span class="done-badge${met}">${n} of ${target} today</span>`;
+    }
+    return n ? `<span class="done-badge">${n}× today</span>` : "";
   }
 
   /* ── Routine picker ────────────────────────────────────────── */
   function renderPicker() {
-    const log = tally();
+    const today = History.day();
+    const targets = Targets.get();
     const opts = Store.get("big3", {});
     els.list.innerHTML = ROUTINES.map((r) => {
       const mins = Math.round(buildRoutine(r.id, opts).total / 60);
-      const n = log[r.id] || 0;
-      const badge = n ? `<span class="done-badge">${n}× today</span>` : "";
+      const badge = badgeFor(today[r.id] || 0, targets[r.id] || 0);
       return `
         <button class="routine ${r.id === selected ? "selected" : ""}" data-id="${r.id}">
           <span class="routine-head"><span class="routine-name">${r.name}</span>
@@ -211,7 +214,7 @@ const Stretch = (() => {
     enter(0);
     clearInterval(ticker);
     ticker = setInterval(tick, TICK_MS);
-    Wake.on();
+    Wake.on("stretch");
     document.dispatchEvent(new CustomEvent("stretch:state", { detail: true }));
   }
 
@@ -254,19 +257,23 @@ const Stretch = (() => {
     clearInterval(ticker);
     ticker = null;
     Voice.stop();
-    Wake.off();
+    Wake.off("stretch");
     els.play.classList.remove("visible");
     document.dispatchEvent(new CustomEvent("stretch:state", { detail: false }));
   }
 
   function finish() {
     const name = plan.routine.name;
-    const n = bumpTally(plan.routine.id);
+    const id = plan.routine.id;
+    const n = bumpTally(id);
     teardown();
     plan = null;
     els.doneText.textContent = `${name} complete. Get up slowly - roll to your side ` +
       "and push up with your arms.";
-    els.doneCount.textContent = `That's ${n}× today.`;
+    const target = Targets.get()[id] || 0;
+    els.doneCount.textContent = target > 0 ?
+      `That's ${n} of ${target} today${n >= target ? " - target met" : ""}.` :
+      `That's ${n}× today.`;
     els.done.classList.add("visible");
     Sound.seq([[523, 0], [659, 0.18], [784, 0.36]], 0.18);
     Voice.speak(`${name} complete. Nicely done.`);
