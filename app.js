@@ -40,6 +40,52 @@
     openModal("settingsOverlay");
   });
 
+  /* ── Day number ────────────────────────────────────────────── */
+  const MAX_DAY = 365;
+
+  function renderDay() {
+    $("dayBtn").textContent = Targets.label();
+    const n = Targets.dayNumber();
+    $("dayVal").innerHTML = `Day ${n}`;
+    $("dayOneInput").value = Targets.dayOne();
+    $("dayOneInput").max = todayKey();
+  }
+
+  // Everything that shows a day number repaints when it changes.
+  function dayChanged() {
+    renderDay();
+    document.dispatchEvent(new CustomEvent("day:changed"));
+  }
+
+  function stepDay(delta) {
+    const n = Math.min(MAX_DAY, Math.max(1, Targets.dayNumber() + delta));
+    Targets.setDayNumber(n);
+    dayChanged();
+  }
+
+  $("dayBtn").addEventListener("click", () => { renderDay(); openModal("dayOverlay"); });
+  $("dayMinus").addEventListener("click", () => stepDay(-1));
+  $("dayPlus").addEventListener("click", () => stepDay(1));
+  $("dayOneInput").addEventListener("change", () => {
+    const v = $("dayOneInput").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || v > todayKey()) return;
+    Targets.setDayOne(v);
+    dayChanged();
+  });
+  $("dayResetBtn").addEventListener("click", () => {
+    if (!confirm("Make today Day 1? Earlier entries keep their dates; their day numbers " +
+                 "will count from the new Day 1.")) return;
+    Targets.setDayOne(todayKey());
+    dayChanged();
+  });
+
+  // Roll over at midnight without a reload.
+  let shownDay = todayKey();
+  setInterval(() => {
+    if (todayKey() !== shownDay) { shownDay = todayKey(); dayChanged(); }
+  }, 60 * MS_PER_SEC);
+  renderDay();
+
   /* ── Big 3 options ─────────────────────────────────────────── */
   function big3Opts() { return { ...DEFAULT_OPTIONS, ...Store.get("big3", {}) }; }
 

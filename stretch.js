@@ -51,6 +51,14 @@ const Stretch = (() => {
     return History.day()[id];
   }
 
+  // Routines meant for later in recovery say how far off that is.
+  function dayHint(r) {
+    if (!r.fromDay) return "";
+    const left = r.fromDay - Targets.dayNumber();
+    if (left <= 0) return "";
+    return ` <span class="day-hint">· ${left} day${left === 1 ? "" : "s"} to go</span>`;
+  }
+
   function badgeFor(n, target) {
     if (target > 0) {
       const met = n >= target ? " met" : "";
@@ -71,7 +79,7 @@ const Stretch = (() => {
         <button class="routine ${r.id === selected ? "selected" : ""}" data-id="${r.id}">
           <span class="routine-head"><span class="routine-name">${r.name}</span>
             <span class="routine-mins">${mins} min</span></span>
-          <span class="routine-when">${r.when}</span>
+          <span class="routine-when">${r.when}${dayHint(r)}</span>
           <span class="routine-blurb">${r.blurb}</span>
           ${badge}
         </button>`;
@@ -311,9 +319,10 @@ const Stretch = (() => {
     els.doneText.textContent = `${name} complete. Getting up: brace lightly, roll onto ` +
       "your side as one piece, push up to hands and knees, then half-kneel and stand.";
     const target = Targets.get()[id] || 0;
+    const day = `Day ${Targets.dayNumber()}`;
     els.doneCount.textContent = target > 0 ?
-      `That's ${n} of ${target} today${n >= target ? " - target met" : ""}.` :
-      `That's ${n}× today.`;
+      `${day}: ${n} of ${target}${n >= target ? " - target met" : ""}.` :
+      `${day}: ${n}× so far.`;
     els.done.classList.add("visible");
     Sound.seq([[523, 0], [659, 0.18], [784, 0.36]], 0.18);
     Voice.speak(`${name} complete. Nicely done.`);
@@ -349,6 +358,7 @@ const Stretch = (() => {
     if (document.visibilityState === "visible") tick();
   });
 
+  document.addEventListener("day:changed", renderPicker);
   renderPicker();
   renderVoice();
   preload();

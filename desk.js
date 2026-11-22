@@ -239,7 +239,8 @@ const Desk = (() => {
     if ((totals.stand || 0) >= 60) parts.push(`stood ${fmtMins(totals.stand)}`);
     if ((totals.sit || 0) >= 60) parts.push(`sat ${fmtMins(totals.sit)}`);
     if ((totals.move || 0) >= 60) parts.push(`moved ${fmtMins(totals.move)}`);
-    els.today.textContent = parts.length ? `Today: ${parts.join(" · ")}` : "";
+    els.today.textContent = parts.length ?
+      `Day ${Targets.dayNumber()}: ${parts.join(" · ")}` : "";
   }
 
   function render() {

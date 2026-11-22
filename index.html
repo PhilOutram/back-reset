@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.06">
+  <meta name="app-version" content="v0.07">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.06">
+  <link rel="stylesheet" href="styles.css?v=0.07">
 </head>
 <body>
 <div class="app">
@@ -25,7 +25,7 @@
     <img class="logo-mark" src="icon-192.png" alt="">
     <div class="header-text">
       <h1>Back Reset</h1>
-      <p id="headerSub">Calm the alarm · keep moving</p>
+      <button class="day-chip" id="dayBtn" title="Set the day number"></button>
     </div>
     <div class="header-btns">
       <button class="btn-round" id="helpBtn" title="How it works" aria-label="How it works">?</button>
@@ -202,12 +202,29 @@
     <details class="desk-settings" id="logSettings">
       <summary>Daily targets <span id="targetSummary"></span></summary>
       <div class="stepper-list" id="targetSteppers"></div>
-      <label class="toggle-row">
-        <span><strong>Day 1</strong><small>The day your back first locked up</small></span>
-        <input type="date" id="dayOneInput">
-      </label>
     </details>
   </section>
+
+  <!-- Day number -->
+  <div class="overlay" id="dayOverlay">
+    <div class="modal" role="dialog" aria-labelledby="dayTitle">
+      <div class="modal-head"><h2 id="dayTitle">Day number</h2><button class="modal-close" data-close>&times;</button></div>
+      <div class="modal-body">
+        <p>Days count from the day your back first locked up. Routines, desk time and pain entries are all stamped with the day number and the date.</p>
+        <div class="stepper day-stepper">
+          <span class="stepper-name">Today is</span>
+          <button id="dayMinus" aria-label="Earlier day">−</button>
+          <span class="stepper-val" id="dayVal"></span>
+          <button id="dayPlus" aria-label="Later day">+</button>
+        </div>
+        <label class="toggle-row">
+          <span><strong>Day 1 was</strong><small>Or pick the date it started</small></span>
+          <input type="date" id="dayOneInput">
+        </label>
+        <button class="btn btn-soft" id="dayResetBtn">New flare-up: make today Day 1</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Pain entry -->
   <div class="overlay" id="painOverlay">
@@ -218,7 +235,7 @@
         <div class="field"><span>How bad (0 = none, 10 = worst)</span><div class="level-row" id="painLevels"></div></div>
         <div class="field"><span>What it feels like</span><div class="kind-row" id="painKinds"></div></div>
         <label class="field"><span>Notes - what set it off, what helped</span><textarea id="painNote" rows="3"></textarea></label>
-        <label class="field"><span>When</span><input id="painWhen" type="datetime-local"></label>
+        <label class="field"><span>When <b id="painWhenDay"></b></span><input id="painWhen" type="datetime-local"></label>
         <p class="pain-flag" id="painFlag" hidden>Pain, tingling or numbness spreading into a leg is worth telling your physio or GP about promptly.</p>
         <div class="pain-form-btns">
           <button class="btn btn-soft" id="painDeleteBtn" hidden>Delete</button>
@@ -258,6 +275,11 @@
           <li>Tap the front or back of the body where it hurts, then pick a score from 0-10, what it feels like, and add a note.</li>
           <li>Tap an entry in the list to edit or delete it.</li>
           <li><strong>Copy journal</strong> gives a dated text log (with your daily activity) to paste into an email or an AI chat. <strong>Share with map</strong> also sends a body map with every entry numbered to match the text.</li>
+        </ul>
+        <h3>Day number</h3>
+        <ul>
+          <li>The day number at the top counts from the day your back first locked up. Tap it to change it, or to start again from Day 1 after a new flare-up.</li>
+          <li>Everything you log is stamped with the day number as well as the date.</li>
         </ul>
         <h3>Log</h3>
         <ul>
@@ -311,7 +333,7 @@
 
 </div>
 
-<script src="version.js?v=0.06"></script>
+<script src="version.js?v=0.07"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -326,12 +348,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.06"></script>
-<script src="routines.js?v=0.06"></script>
-<script src="stretch.js?v=0.06"></script>
-<script src="desk.js?v=0.06"></script>
-<script src="pain.js?v=0.06"></script>
-<script src="log.js?v=0.06"></script>
-<script src="app.js?v=0.06"></script>
+<script src="core.js?v=0.07"></script>
+<script src="routines.js?v=0.07"></script>
+<script src="stretch.js?v=0.07"></script>
+<script src="desk.js?v=0.07"></script>
+<script src="pain.js?v=0.07"></script>
+<script src="log.js?v=0.07"></script>
+<script src="app.js?v=0.07"></script>
 </body>
 </html>

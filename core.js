@@ -270,4 +270,16 @@ const Targets = {
   dayOne() { return Store.get("dayOne", DEFAULT_DAY_ONE); },
   setDayOne(key) { Store.set("dayOne", key); },
   dayNumber(key = todayKey()) { return daysBetween(this.dayOne(), key) + 1; },
+  // "Today is day n" -> move Day 1 so that it is.
+  setDayNumber(n) {
+    const d = new Date();
+    d.setDate(d.getDate() - (n - 1));
+    this.setDayOne(dayKeyOf(d));
+  },
+  // "Day 8 · Sun 22 Nov" - the one way a date is labelled across the app.
+  label(key = todayKey(), opts = { weekday: "short", day: "numeric", month: "short" }) {
+    const n = this.dayNumber(key);
+    const date = parseDay(key).toLocaleDateString("en-GB", opts);
+    return n > 0 ? `Day ${n} · ${date}` : date;
+  },
 };

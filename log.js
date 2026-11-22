@@ -16,7 +16,7 @@ const Log = (() => {
   const $ = (id) => document.getElementById(id);
   const els = {
     day: $("logDay"), date: $("logDate"), targets: $("targetRow"), table: $("logTable"),
-    steppers: $("targetSteppers"), dayOne: $("dayOneInput"), summary: $("targetSummary"),
+    steppers: $("targetSteppers"), summary: $("targetSummary"),
   };
 
   const mins = (secs) => Math.round((secs || 0) / SECS_PER_MIN);
@@ -111,8 +111,6 @@ const Log = (() => {
         </div>`;
     }).join("");
     els.summary.textContent = COLS.map((c) => targets[c.id]).join(" / ");
-    els.dayOne.value = Targets.dayOne();
-    els.dayOne.max = todayKey();
   }
 
   function render() {
@@ -132,11 +130,7 @@ const Log = (() => {
     Stretch.renderPicker();
   });
 
-  els.dayOne.addEventListener("change", () => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(els.dayOne.value)) return;
-    Targets.setDayOne(els.dayOne.value);
-    render();
-  });
+  document.addEventListener("day:changed", render);
 
   // Desk minutes tick up constantly, so only repaint while the tab is on screen.
   document.addEventListener("history:changed", () => {

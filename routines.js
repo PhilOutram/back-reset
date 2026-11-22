@@ -308,7 +308,8 @@ const ROUTINES = [
   {
     id: "flexion",
     name: "Bending Return",
-    when: "From about day 10 · stop at mild discomfort",
+    when: "From day 10 · stop at mild discomfort",
+    fromDay: 10,
     blurb: "Gently brings forward bending back: full cat-cow, knee hugs and slow roll-downs, " +
            "finishing with extensions.",
     build: () => [
@@ -328,7 +329,8 @@ const ROUTINES = [
   {
     id: "mobility",
     name: "Hips & Mid-Back",
-    when: "Phase 2 · from Tuesday, once the stiffness has eased",
+    when: "Phase 2 · from day 10, once the stiffness has eased",
+    fromDay: 10,
     blurb: "Hip switches, open book, dowel hinge, Pallof press, split squats and a wall sit. " +
            "Needs a stick and a band.",
     build: () => [

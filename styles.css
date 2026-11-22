@@ -812,3 +812,23 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
 .pain-form-btns { display: flex; justify-content: flex-end; gap: 10px; }
 .pain-form-btns .btn-main { min-width: 110px; }
 .btn[hidden] { display: none; }
+
+/* ── Day number ─────────────────────────────────────────────── */
+.day-chip {
+  margin-top: 2px;
+  border: 0;
+  padding: 2px 9px;
+  border-radius: 99px;
+  background-color: rgba(90,107,78,.12);
+  color: var(--moss);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  cursor: pointer;
+}
+.day-chip:hover { background-color: rgba(90,107,78,.2); }
+.day-stepper { border-top: 0; padding: 4px 0; }
+.day-stepper .stepper-val { font-family: 'Lora', serif; font-size: 18px; }
+#dayResetBtn { align-self: center; margin-top: 6px; font-size: 13px; }
+.day-hint { color: var(--amber); }
+#painWhenDay { font-weight: 500; color: var(--moss); }

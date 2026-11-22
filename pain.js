@@ -13,6 +13,7 @@ const Pain = (() => {
   const LIVE_DAYS    = 7;     // markers and list rows shown on the tab
   const EXPORT_SCALE = 3;
   const MAX_LEVEL    = 10;
+  const DAY_HEAD     = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
   const MS_PER_MIN   = 60 * MS_PER_SEC;
   const KINDS = ["Ache", "Stiff", "Sharp", "Spasm / catch", "Tingling / numb", "Burning",
     "Shooting"];
@@ -46,6 +47,7 @@ const Pain = (() => {
     overlay: $("painOverlay"), title: $("painTitle"), region: $("painRegion"),
     levels: $("painLevels"), kinds: $("painKinds"), when: $("painWhen"), note: $("painNote"),
     save: $("painSaveBtn"), del: $("painDeleteBtn"), flag: $("painFlag"),
+    whenDay: $("painWhenDay"),
   };
 
   let entries = Store.get("pain", []);
@@ -161,6 +163,7 @@ const Pain = (() => {
     els.title.textContent = entry.id ? "Edit pain entry" : "Log pain";
     els.region.value = draft.region;
     els.when.value = localInputValue(draft.t);
+    renderWhenDay();
     els.note.value = draft.note;
     els.del.hidden = !entry.id;
     renderEditor();
@@ -195,6 +198,14 @@ const Pain = (() => {
     renderEditor();
   });
   els.region.addEventListener("input", renderEditor);
+
+  // The form shows which day the chosen time falls on.
+  function renderWhenDay() {
+    const t = els.when.value ? new Date(els.when.value).getTime() : Date.now();
+    const n = Number.isFinite(t) ? Targets.dayNumber(dayKeyOf(new Date(t))) : 0;
+    els.whenDay.textContent = n > 0 ? `· Day ${n}` : "";
+  }
+  els.when.addEventListener("input", renderWhenDay);
 
   function closeEditor() {
     els.overlay.classList.remove("visible");
@@ -239,7 +250,7 @@ const Pain = (() => {
     els.list.innerHTML = shown.map((e) => {
       const day = dayKeyOf(new Date(e.t));
       const head = day !== lastDay ?
-        `<li class="pain-day">${dateOf(e.t)} · Day ${Targets.dayNumber(day)}</li>` : "";
+        `<li class="pain-day">${Targets.label(day, DAY_HEAD)}</li>` : "";
       lastDay = day;
       const kindText = esc(e.kinds.join(", ").toLowerCase());
       const kinds = e.kinds.length ? ` <span class="pain-kinds">${kindText}</span>` : "";
@@ -288,7 +299,7 @@ const Pain = (() => {
       "",
     ];
     [...days].sort().forEach((key) => {
-      lines.push(`${dateOf(parseDay(key).getTime())} - Day ${Targets.dayNumber(key)}`);
+      lines.push(Targets.label(key, DAY_HEAD));
       const act = activityLine(key);
       if (act) lines.push(`  Activity: ${act}`);
       list.filter((e) => dayKeyOf(new Date(e.t)) === key).forEach((e) => {
@@ -324,7 +335,7 @@ const Pain = (() => {
       `width="${vw * EXPORT_SCALE}" height="${vh * EXPORT_SCALE}">` +
       `<rect x="-6" width="${w + 12}" height="${VIEW_H + top + 20}" fill="#FDFAF6"/>` +
       `<text x="0" y="13" font-size="8" font-family="sans-serif" fill="#2C2218">` +
-      `Pain map · ${dateOf(Date.now())}</text>${legend}${views}` +
+      `Pain map · ${Targets.label(todayKey(), DAY_HEAD)}</text>${legend}${views}` +
       `<g transform="translate(0 ${top})">${marks}</g></svg>`;
   }
 
@@ -406,6 +417,7 @@ const Pain = (() => {
     renderList();
   }
 
+  document.addEventListener("day:changed", render);
   render();
 
   return { render, maxForDay, levelColour, journalText, mapSvg };
