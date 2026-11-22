@@ -119,12 +119,14 @@ const Sound = (() => {
 const Voice = (() => {
   let enabled = Store.get("voice", true);
 
-  function speak(text) {
+  // volume 0-1. Some Android voices ignore it, hence the "pips only" rhythm setting.
+  function speak(text, volume = 1) {
     if (!enabled || !text || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.rate = 0.92;
     u.pitch = 0.95;
+    u.volume = volume;
     const pref = window.speechSynthesis.getVoices()
       .find((v) => /en-GB/i.test(v.lang) && /natural|google|female|male/i.test(v.name)) ||
       window.speechSynthesis.getVoices().find((v) => /en-GB|en-AU/i.test(v.lang));

@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.05">
+  <meta name="app-version" content="v0.06">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.05">
+  <link rel="stylesheet" href="styles.css?v=0.06">
 </head>
 <body>
 <div class="app">
@@ -279,8 +279,15 @@
   <!-- Settings -->
   <div class="overlay" id="settingsOverlay">
     <div class="modal" role="dialog" aria-labelledby="settingsTitle">
-      <div class="modal-head"><h2 id="settingsTitle">McGill Big 3</h2><button class="modal-close" data-close>&times;</button></div>
+      <div class="modal-head"><h2 id="settingsTitle">Settings</h2><button class="modal-close" data-close>&times;</button></div>
       <div class="modal-body">
+        <h3>Rhythm cues</h3>
+        <p>The in-between words on moving exercises, like <em>Gentle arch</em> and <em>Flat back</em>. A soft pip always marks the change.</p>
+        <div class="choice-group" data-opt="rhythm" data-store="rhythm">
+          <button data-val="quiet">Quiet words <small>20% volume</small></button>
+          <button data-val="pips">Pips only <small>no words</small></button>
+        </div>
+        <h3>McGill Big 3</h3>
         <p>Applies the next time you begin the Big 3.</p>
         <div class="choice-group" data-opt="pyramid">
           <span class="choice-label">Pyramid</span>
@@ -304,7 +311,7 @@
 
 </div>
 
-<script src="version.js?v=0.05"></script>
+<script src="version.js?v=0.06"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -319,12 +326,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.05"></script>
-<script src="routines.js?v=0.05"></script>
-<script src="stretch.js?v=0.05"></script>
-<script src="desk.js?v=0.05"></script>
-<script src="pain.js?v=0.05"></script>
-<script src="log.js?v=0.05"></script>
-<script src="app.js?v=0.05"></script>
+<script src="core.js?v=0.06"></script>
+<script src="routines.js?v=0.06"></script>
+<script src="stretch.js?v=0.06"></script>
+<script src="desk.js?v=0.06"></script>
+<script src="pain.js?v=0.06"></script>
+<script src="log.js?v=0.06"></script>
+<script src="app.js?v=0.06"></script>
 </body>
 </html>

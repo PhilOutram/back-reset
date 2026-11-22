@@ -8,7 +8,9 @@
 
   /* ── Tabs ──────────────────────────────────────────────────── */
   const tabs = document.querySelectorAll(".tab");
-  const views = { stretch: $("stretchView"), desk: $("deskView"), log: $("logView"), pain: $("painView") };
+  const views = {
+    stretch: $("stretchView"), desk: $("deskView"), log: $("logView"), pain: $("painView"),
+  };
 
   function showView(name) {
     tabs.forEach((t) => t.classList.toggle("active", t.dataset.view === name));
@@ -33,7 +35,10 @@
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModals(); });
   $("helpBtn").addEventListener("click", () => openModal("helpOverlay"));
-  $("settingsBtn").addEventListener("click", () => { renderBig3(); openModal("settingsOverlay"); });
+  $("settingsBtn").addEventListener("click", () => {
+    renderBig3();
+    openModal("settingsOverlay");
+  });
 
   /* ── Big 3 options ─────────────────────────────────────────── */
   function big3Opts() { return { ...DEFAULT_OPTIONS, ...Store.get("big3", {}) }; }
@@ -41,8 +46,9 @@
   function renderBig3() {
     const opts = big3Opts();
     document.querySelectorAll(".choice-group").forEach((g) => {
+      const current = g.dataset.store ? Store.get(g.dataset.store, "quiet") : opts[g.dataset.opt];
       g.querySelectorAll("button").forEach((b) => {
-        b.classList.toggle("active", String(opts[g.dataset.opt]) === b.dataset.val);
+        b.classList.toggle("active", String(current) === b.dataset.val);
       });
     });
     const mins = Math.round(buildRoutine("big3", opts).total / 60);
@@ -53,6 +59,11 @@
     g.addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b) return;
+      if (g.dataset.store) {
+        Store.set(g.dataset.store, b.dataset.val);
+        renderBig3();
+        return;
+      }
       const opts = Store.get("big3", {});
       const key = g.dataset.opt;
       opts[key] = key === "pyramid" ? b.dataset.val : Number(b.dataset.val);

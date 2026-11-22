@@ -1,10 +1,18 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.05";
+const VERSION = "v0.06";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.06",
+    date: "2026-11-22",
+    notes: [
+      "Rhythm words (Gentle arch, Flat back...) are spoken at 20% volume.",
+      "New setting: quiet words or pips only.",
+    ],
+  },
   {
     version: "v0.05",
     date: "2026-11-22",

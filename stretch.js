@@ -182,6 +182,7 @@ const Stretch = (() => {
      with voice on, the word spoken - so you move with the rhythm instead of holding. */
   const PACE_FREQS = [660, 520];
   const PACE_VOL   = 0.12;
+  const RHYTHM_WORD_VOL = 0.2;   // the in-between words are spoken quietly
   const PACE_TAIL_MS = 1200;   // no new cue this close to the end of the exercise
 
   function paceAt(pace, t) {
@@ -206,7 +207,7 @@ const Stretch = (() => {
     els.label.textContent = (s.label ? `${s.label} · ` : "") + `Rep ${rep + 1}`;
     if (leftMs < PACE_TAIL_MS) return;
     Sound.pip(PACE_FREQS[i % PACE_FREQS.length], PACE_VOL);
-    Voice.speak(pace[i][0]);
+    if (Store.get("rhythm", "quiet") === "quiet") Voice.speak(pace[i][0], RHYTHM_WORD_VOL);
   }
 
   /* ── Engine ────────────────────────────────────────────────── */

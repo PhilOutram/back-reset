@@ -348,7 +348,10 @@ const ROUTINES = [
         how: "Hold the band, anchored at chest height, and step out sideways.",
       }),
       ...timed("splitSquat", 40, LEAD_IN, { how: "Step into a long split stance." }),
-      ...timed("wallSit", 30, LEAD_IN + 4, { label: "Set 1 of 2", how: "Find a clear bit of wall." }),
+      ...timed("wallSit", 30, LEAD_IN + 4, {
+        label: "Set 1 of 2",
+        how: "Find a clear bit of wall.",
+      }),
       seg("wallSit", "rest", 20, { label: "Rest before set 2", say: "Rest." }),
       seg("wallSit", "timed", 30, { label: "Set 2 of 2" }),
     ],

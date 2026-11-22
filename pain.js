@@ -57,7 +57,8 @@ const Pain = (() => {
   const viewOffset = (view) => (view === "front" ? 0 : VIEW_W + VIEW_GAP);
   const sorted = () => [...entries].sort((a, b) => a.t - b.t);
   const numberOf = (e) => sorted().indexOf(e) + 1;
-  const timeOf = (t) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const timeOf = (t) =>
+    new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   const dateOf = (t) => new Date(t).toLocaleDateString("en-GB",
     { weekday: "short", day: "numeric", month: "short", year: "numeric" });
   const esc = (s) => String(s).replace(/[&<>"]/g,
@@ -85,7 +86,10 @@ const Pain = (() => {
       if (back) return centre ? "Upper back, centre" : s("Upper back / shoulder blade");
       return s("Chest");
     }
-    if (y < 108) return back ? (centre ? "Mid back, centre" : s("Mid back")) : s("Ribs / upper abdomen");
+    if (y < 108) {
+      if (back) return centre ? "Mid back, centre" : s("Mid back");
+      return s("Ribs / upper abdomen");
+    }
     if (y < 140) {
       if (back) {
         if (centre) return "Lower back, centre (spine)";
@@ -94,7 +98,10 @@ const Pain = (() => {
       return ad > 21 ? s("Side of hip") : s("Lower abdomen");
     }
     if (y < 160) {
-      if (back) return ad < 5 ? "Tailbone / sacrum" : ad < 14 ? s("SI joint area") : s("Buttock (glute)");
+      if (back) {
+        if (ad < 5) return "Tailbone / sacrum";
+        return ad < 14 ? s("SI joint area") : s("Buttock (glute)");
+      }
       return ad < 7 ? "Groin" : s("Front of hip / hip flexor");
     }
     if (y < 200) return back ? s("Back of thigh (hamstring)") : s("Front of thigh (quad)");
@@ -119,7 +126,8 @@ const Pain = (() => {
     const recent = sorted().filter((e) => e.t >= cutoff);
     const marks = recent.map((e, i) => {
       const last = i === recent.length - 1;
-      return `<g class="mark" style="opacity:${last ? 1 : 0.55}">${marker(e, last ? 5 : 3.6, false)}</g>`;
+      const dot = marker(e, last ? 5 : 3.6, false);
+      return `<g class="mark" style="opacity:${last ? 1 : 0.55}">${dot}</g>`;
     }).join("");
     els.map.innerHTML =
       ["front", "back"].map((v) =>
@@ -182,7 +190,8 @@ const Pain = (() => {
     const b = e.target.closest("button");
     if (!b) return;
     const k = b.dataset.kind;
-    draft.kinds = draft.kinds.includes(k) ? draft.kinds.filter((x) => x !== k) : [...draft.kinds, k];
+    const has = draft.kinds.includes(k);
+    draft.kinds = has ? draft.kinds.filter((x) => x !== k) : [...draft.kinds, k];
     renderEditor();
   });
   els.region.addEventListener("input", renderEditor);
@@ -232,11 +241,13 @@ const Pain = (() => {
       const head = day !== lastDay ?
         `<li class="pain-day">${dateOf(e.t)} · Day ${Targets.dayNumber(day)}</li>` : "";
       lastDay = day;
-      const kinds = e.kinds.length ? ` <span class="pain-kinds">${esc(e.kinds.join(", ").toLowerCase())}</span>` : "";
+      const kindText = esc(e.kinds.join(", ").toLowerCase());
+      const kinds = e.kinds.length ? ` <span class="pain-kinds">${kindText}</span>` : "";
       const note = e.note ? `<span class="pain-note">${esc(e.note)}</span>` : "";
       return `${head}<li class="pain-row" data-id="${e.id}">` +
-        `<span class="pain-lvl" style="background-color:${levelColour(e.level)}">${e.level}</span>` +
-        `<span class="pain-text"><span class="pain-where"><b>#${numberOf(e)}</b> ${timeOf(e.t)} · ` +
+        `<span class="pain-lvl" style="background-color:${levelColour(e.level)}">` +
+        `${e.level}</span><span class="pain-text"><span class="pain-where">` +
+        `<b>#${numberOf(e)}</b> ${timeOf(e.t)} · ` +
         `${esc(e.region)}${kinds}</span>${note}</span></li>`;
     }).join("") || '<li class="pain-empty">Nothing logged yet. Tap the body where it hurts.</li>';
     els.more.hidden = hidden <= 0 && !showAll;
@@ -265,7 +276,9 @@ const Pain = (() => {
   function journalText() {
     const list = sorted();
     const days = new Set(list.map((e) => dayKeyOf(new Date(e.t))));
-    Object.entries(History.all()).forEach(([k, v]) => { if (Object.keys(v).length) days.add(k); });
+    Object.entries(History.all()).forEach(([k, v]) => {
+      if (Object.keys(v).length) days.add(k);
+    });
     const now = Date.now();
     const lines = [
       "BACK PAIN JOURNAL",
@@ -299,7 +312,8 @@ const Pain = (() => {
       `<g fill="#EFE6DA" stroke="#A08070" stroke-width="1">${BODY}</g>` +
       `<g fill="none" stroke="#C9B8A6" stroke-width=".8">${DETAIL[v]}</g>` +
       `<text x="${MID_X}" y="${VIEW_H + 12}" text-anchor="middle" font-size="8" ` +
-      `font-family="sans-serif" fill="#6B5B4E">${v === "front" ? "Front" : "Back"}</text></g>`).join("");
+      `font-family="sans-serif" fill="#6B5B4E">${v === "front" ? "Front" : "Back"}</text></g>`)
+      .join("");
     const legend = [["0-3", COLOURS.low], ["4-6", COLOURS.mid], ["7-10", COLOURS.high]]
       .map(([t, c], i) => `<circle cx="${w - 64 + i * 22}" cy="11" r="3.5" fill="${c}"/>` +
         `<text x="${w - 58 + i * 22}" y="13.5" font-size="6" font-family="sans-serif" ` +
