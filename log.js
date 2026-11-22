@@ -9,6 +9,7 @@ const Log = (() => {
   const COLS = [
     { id: "release",  head: "Ph 1" },
     { id: "big3",     head: "Big 3" },
+    { id: "flexion",  head: "Bend" },
     { id: "mobility", head: "Ph 2" },
   ];
 
@@ -20,12 +21,19 @@ const Log = (() => {
 
   const mins = (secs) => Math.round((secs || 0) / SECS_PER_MIN);
   const shortDate = (key) =>
-    parseDay(key).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    parseDay(key).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
   function cell(n, target) {
     if (!n) return '<td class="none">–</td>';
     const cls = target > 0 ? (n >= target ? "met" : "part") : "";
     return `<td class="${cls}">${n}</td>`;
+  }
+
+  function painCell(key) {
+    const max = Pain.maxForDay(key);
+    if (max === null) return '<td class="none">–</td>';
+    return `<td><span class="pain-dot" style="background-color:${Pain.levelColour(max)}">` +
+           `${max}</span></td>`;
   }
 
   function deskCell(d) {
@@ -40,6 +48,8 @@ const Log = (() => {
     const recorded = Object.keys(History.all()).sort();
     let start = Targets.dayOne();
     if (recorded.length && recorded[0] < start) start = recorded[0];
+    const painDays = Store.get("pain", []).map((e) => dayKeyOf(new Date(e.t))).sort();
+    if (painDays.length && painDays[0] < start) start = painDays[0];
     if (start > today) start = today;
     const keys = [];
     for (let d = parseDay(today); dayKeyOf(d) >= start; d.setDate(d.getDate() - 1)) {
@@ -76,13 +86,14 @@ const Log = (() => {
     const targets = Targets.get();
     const all = History.all();
     const head = '<thead><tr><th>Day</th><th>Date</th>' +
-      COLS.map((c) => `<th>${c.head}</th>`).join("") + "<th>Desk</th></tr></thead>";
+      COLS.map((c) => `<th>${c.head}</th>`).join("") + "<th>Pain</th><th>Desk</th></tr></thead>";
     const rows = dayKeys().map((key) => {
       const d = all[key] || {};
       const n = daysBetween(Targets.dayOne(), key) + 1;
       const isToday = key === todayKey() ? ' class="today-row"' : "";
       return `<tr${isToday}><td class="num">${n > 0 ? n : "–"}</td><td>${shortDate(key)}</td>` +
-        COLS.map((c) => cell(d[c.id] || 0, targets[c.id])).join("") + deskCell(d) + "</tr>";
+        COLS.map((c) => cell(d[c.id] || 0, targets[c.id])).join("") + painCell(key) +
+        deskCell(d) + "</tr>";
     });
     els.table.innerHTML = head + `<tbody>${rows.join("")}</tbody>`;
   }

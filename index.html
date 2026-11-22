@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.03">
+  <meta name="app-version" content="v0.04">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.03">
+  <link rel="stylesheet" href="styles.css?v=0.04">
 </head>
 <body>
 <div class="app">
@@ -38,6 +38,7 @@
   <nav class="tabs" role="tablist">
     <button class="tab active" data-view="stretch" role="tab">Stretches</button>
     <button class="tab" data-view="desk" role="tab">Desk <span class="live-dot" id="deskDot"></span></button>
+    <button class="tab" data-view="pain" role="tab">Pain</button>
     <button class="tab" data-view="log" role="tab">Log</button>
   </nav>
 
@@ -171,6 +172,21 @@
     <p class="today" id="deskToday"></p>
   </section>
 
+  <!-- ═══ PAIN ═══ -->
+  <section class="view" id="painView">
+    <div class="card pain-card">
+      <p class="pain-hint">Tap where it hurts to log it</p>
+      <svg class="body-map" id="bodyMap" role="img" aria-label="Body map, front and back"></svg>
+      <div class="pain-actions">
+        <button class="btn btn-soft" id="painCopyBtn">Copy journal</button>
+        <button class="btn btn-main" id="painShareBtn">Share with map</button>
+      </div>
+      <p class="pain-status" id="painStatus" aria-live="polite"></p>
+    </div>
+    <ul class="pain-list" id="painList"></ul>
+    <button class="link-btn" id="painMoreBtn" hidden></button>
+  </section>
+
   <!-- ═══ LOG ═══ -->
   <section class="view" id="logView">
     <div class="card log-card">
@@ -180,7 +196,7 @@
       </div>
       <div class="target-row" id="targetRow"></div>
       <div class="log-table-wrap"><table class="log-table" id="logTable"></table></div>
-      <p class="fine log-legend">Ph 1 = Back Release · Ph 2 = Hips &amp; Mid-Back · Desk = minutes stood / sat / moved</p>
+      <p class="fine log-legend">Ph 1 = Back Release · Bend = Bending Return · Ph 2 = Hips &amp; Mid-Back · Pain = worst logged that day · Desk = minutes stood / sat / moved</p>
     </div>
 
     <details class="desk-settings" id="logSettings">
@@ -193,6 +209,25 @@
     </details>
   </section>
 
+  <!-- Pain entry -->
+  <div class="overlay" id="painOverlay">
+    <div class="modal" role="dialog" aria-labelledby="painTitle">
+      <div class="modal-head"><h2 id="painTitle">Log pain</h2><button class="modal-close" data-close>&times;</button></div>
+      <div class="modal-body pain-form">
+        <label class="field"><span>Where</span><input id="painRegion" type="text" autocomplete="off"></label>
+        <div class="field"><span>How bad (0 = none, 10 = worst)</span><div class="level-row" id="painLevels"></div></div>
+        <div class="field"><span>What it feels like</span><div class="kind-row" id="painKinds"></div></div>
+        <label class="field"><span>Notes - what set it off, what helped</span><textarea id="painNote" rows="3"></textarea></label>
+        <label class="field"><span>When</span><input id="painWhen" type="datetime-local"></label>
+        <p class="pain-flag" id="painFlag" hidden>Pain, tingling or numbness spreading into a leg is worth telling your physio or GP about promptly.</p>
+        <div class="pain-form-btns">
+          <button class="btn btn-soft" id="painDeleteBtn" hidden>Delete</button>
+          <button class="btn btn-main" id="painSaveBtn" disabled>Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Help -->
   <div class="overlay" id="helpOverlay">
     <div class="modal" role="dialog" aria-labelledby="helpTitle">
@@ -200,9 +235,10 @@
       <div class="modal-body">
         <h3>Stretches</h3>
         <ul>
-          <li><strong>Back Release</strong> - the Phase 1 mobility set. Do it twice a day once you're warmed up, and before bed.</li>
+          <li><strong>Back Release</strong> - the Phase 1 set: extensions, Sphinx, cat-cow, hip rotation, glute bridges and a short legs-up rest. Twice a day once you're warmed up.</li>
           <li><strong>McGill Big 3</strong> - short braced holds in a 3-2-1 pyramid, once a day mid-day. Switch to 5-3-1 in Settings once it's pain-free.</li>
-          <li><strong>Hips &amp; Mid-Back</strong> - Phase 2 extras for when the stiffness has eased.</li>
+          <li><strong>Bending Return</strong> - from about day 10, gently brings forward bending back so a low hockey crouch stops feeling risky. Stop at mild discomfort.</li>
+          <li><strong>Hips &amp; Mid-Back</strong> - Phase 2 extras for when the stiffness has eased, including leg work for skiing.</li>
           <li>Each exercise starts with a few seconds to get into position. Pips count you in; the voice can be muted.</li>
           <li>The screen stays on while a routine is running.</li>
         </ul>
@@ -212,7 +248,14 @@
           <li>Each change gets a short beep-beep - rising for stand, falling for sit, three notes for move.</li>
           <li>It keeps working with the screen off: leave this page open (don't swipe it away) and the phone can sleep.</li>
           <li>Tap a position in the strip to jump straight to it, e.g. if you sat down early.</li>
+          <li>Presets: <strong>Rain-day</strong> 25/15/5, <strong>Tired evening</strong> 15/15/5, and <strong>Rebuild sitting</strong> 15/30/5 for when it's time to sit for longer again.</li>
           <li>On an iPhone the beeps stop when the screen locks, so turn on <strong>Keep screen on</strong>.</li>
+        </ul>
+        <h3>Pain</h3>
+        <ul>
+          <li>Tap the front or back of the body where it hurts, then pick a score from 0-10, what it feels like, and add a note.</li>
+          <li>Tap an entry in the list to edit or delete it.</li>
+          <li><strong>Copy journal</strong> gives a dated text log (with your daily activity) to paste into an email or an AI chat. <strong>Share with map</strong> also sends a body map with every entry numbered to match the text.</li>
         </ul>
         <h3>Log</h3>
         <ul>
@@ -259,7 +302,7 @@
 
 </div>
 
-<script src="version.js?v=0.03"></script>
+<script src="version.js?v=0.04"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -274,11 +317,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.03"></script>
-<script src="routines.js?v=0.03"></script>
-<script src="stretch.js?v=0.03"></script>
-<script src="desk.js?v=0.03"></script>
-<script src="log.js?v=0.03"></script>
-<script src="app.js?v=0.03"></script>
+<script src="core.js?v=0.04"></script>
+<script src="routines.js?v=0.04"></script>
+<script src="stretch.js?v=0.04"></script>
+<script src="desk.js?v=0.04"></script>
+<script src="pain.js?v=0.04"></script>
+<script src="log.js?v=0.04"></script>
+<script src="app.js?v=0.04"></script>
 </body>
 </html>

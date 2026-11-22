@@ -18,11 +18,20 @@ const SWITCH_SECS   = 5;    // seconds to swap sides
 const RELAX_SECS    = 3;    // reset between two holds of the same set
 
 const EXERCISES = {
+  standingExt: {
+    name: "Standing Back Extension",
+    short: "Extension",
+    img: "poses/standing-extension.svg",
+    tip: "Hands on the small of your back. Lean back gently for 2-3 s, then upright. 8-10 reps.",
+    say: "Standing back extensions. Hands on the small of your back, lean gently backwards, " +
+         "then come back up. Mild pressure only.",
+  },
   sphinx: {
     name: "Sphinx Pose",
     short: "Sphinx",
     img: "poses/sphinx.webp",
-    tip: "Forearms down, lower back and glutes completely slack. Breathe into your belly.",
+    tip: "Forearms down, back and glutes slack, breathe into your belly. If easy, press up " +
+         "onto straight arms and lower again.",
     say: "Sphinx pose. Lie on your stomach and prop yourself up on your forearms. " +
          "Let your lower back go completely slack.",
   },
@@ -42,6 +51,58 @@ const EXERCISES = {
     say: "Hip rotation. Lie on your back, rest one ankle across the other knee, and " +
          "gently press the knee away.",
     sides: ["Right ankle across", "Left ankle across"],
+  },
+  gluteBridge: {
+    name: "Glute Bridge",
+    short: "Bridge",
+    img: "poses/glute-bridge.svg",
+    tip: "Knees bent. Squeeze your glutes and lift into a line from knees to shoulders. " +
+         "2 slow sets of 10.",
+    say: "Glute bridge. On your back, knees bent. Squeeze your glutes and lift your hips, " +
+         "then lower slowly.",
+  },
+  catCowFull: {
+    name: "Full-Range Cat-Cow",
+    short: "Cat-Cow",
+    img: "poses/cat-cow.webp",
+    tip: "Now use more range: round up into the cat as far as is comfortable. Stop at mild " +
+         "discomfort.",
+    say: "Full range cat cow. On hands and knees, arch and then round your back further " +
+         "than before, as far as feels comfortable.",
+  },
+  kneeHug: {
+    name: "Knee Hug",
+    short: "Knee hug",
+    img: "poses/knee-hug.svg",
+    tip: "On your back, gently draw both knees towards your chest, then ease off. Mild " +
+         "stretch only.",
+    say: "Knee hug. Lie on your back and gently draw both knees towards your chest, " +
+         "easing in and out.",
+  },
+  rollDown: {
+    name: "Standing Roll-Down",
+    short: "Roll-down",
+    img: "poses/roll-down.svg",
+    tip: "Soft knees. Slowly roll down towards your shins, then roll back up. 6-8 reps.",
+    say: "Standing roll down. Soft knees, slowly roll down towards your shins, then roll " +
+         "back up. Stop at mild discomfort.",
+  },
+  splitSquat: {
+    name: "Split Squat",
+    short: "Split squat",
+    img: "poses/split-squat.svg",
+    tip: "Chest tall, front shin upright. Lower the back knee towards the floor. 8 slow reps.",
+    say: "Split squat. One foot forward, chest tall. Lower your back knee towards the " +
+         "floor and drive back up.",
+    sides: ["Left foot forward", "Right foot forward"],
+  },
+  wallSit: {
+    name: "Wall Sit",
+    short: "Wall sit",
+    img: "poses/wall-sit.svg",
+    tip: "Back flat on the wall, slide down until your thighs are nearly level. Breathe.",
+    say: "Wall sit. Back flat against the wall, slide down until your thighs are nearly " +
+         "level, and hold.",
   },
   legsUp: {
     name: "90/90 Legs-Up Rest",
@@ -192,12 +253,15 @@ const ROUTINES = [
     id: "release",
     name: "Back Release",
     when: "Twice a day, once warmed up · and before bed",
-    blurb: "Sphinx, mid-range cat-cow, hip rotation each side, then 5 minutes of legs-up rest.",
+    blurb: "Standing extensions, Sphinx, mid-range cat-cow, hip rotation each side, glute " +
+           "bridges, then 2 minutes of legs-up rest.",
     build: () => [
-      ...timed("sphinx", 90, LEAD_IN_FIRST),
+      ...timed("standingExt", 40, LEAD_IN_FIRST),
+      ...timed("sphinx", 90, LEAD_IN),
       ...timed("catCow", 60, LEAD_IN),
       ...timed("hipRotation", 20, LEAD_IN),
-      ...timed("legsUp", 300, LEAD_IN),
+      ...timed("gluteBridge", 60, LEAD_IN),
+      ...timed("legsUp", 120, LEAD_IN),
     ],
   },
   {
@@ -212,10 +276,24 @@ const ROUTINES = [
     ],
   },
   {
+    id: "flexion",
+    name: "Bending Return",
+    when: "From about day 10 · stop at mild discomfort",
+    blurb: "Gently brings forward bending back: full cat-cow, knee hugs and slow roll-downs, " +
+           "finishing with extensions.",
+    build: () => [
+      ...timed("catCowFull", 60, LEAD_IN_FIRST),
+      ...timed("kneeHug", 45, LEAD_IN),
+      ...timed("rollDown", 60, LEAD_IN),
+      ...timed("standingExt", 30, LEAD_IN),
+    ],
+  },
+  {
     id: "mobility",
     name: "Hips & Mid-Back",
     when: "Phase 2 · from Tuesday, once the stiffness has eased",
-    blurb: "Hip switches, open book, dowel hinge and Pallof press. Needs a stick and a band.",
+    blurb: "Hip switches, open book, dowel hinge, Pallof press, split squats and a wall sit. " +
+           "Needs a stick and a band.",
     build: () => [
       ...timed("hipSwitch", 60, LEAD_IN_FIRST),
       ...timed("openBook", 40, LEAD_IN),
@@ -223,6 +301,10 @@ const ROUTINES = [
       seg("hipHinge", "rest", 20, { label: "Rest before set 2", say: "Rest." }),
       seg("hipHinge", "timed", 45, { label: "Set 2 of 2" }),
       ...timed("pallof", 40, LEAD_IN),
+      ...timed("splitSquat", 40, LEAD_IN),
+      ...timed("wallSit", 30, LEAD_IN, "Set 1 of 2"),
+      seg("wallSit", "rest", 20, { label: "Rest before set 2", say: "Rest." }),
+      seg("wallSit", "timed", 30, { label: "Set 2 of 2" }),
     ],
   },
 ];

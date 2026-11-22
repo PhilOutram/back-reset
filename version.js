@@ -1,10 +1,23 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.03";
+const VERSION = "v0.04";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.04",
+    date: "2026-11-22",
+    notes: [
+      "New Pain tab: tap a body map to log where it hurts (0-10, type, notes); copy the " +
+        "dated journal or share it with a numbered map for your physio or an AI.",
+      "Routines updated after a second opinion: Back Release gains standing extensions " +
+        "and glute bridges, with a 2-minute legs-up; new Bending Return routine; split " +
+        "squats and wall sits in Hips & Mid-Back.",
+      "Desk: Rebuild sitting preset (15/30/5), sitting up to 45 min, extensions at Move " +
+        "breaks. Log shows the worst pain each day.",
+    ],
+  },
   {
     version: "v0.03",
     date: "2026-11-22",

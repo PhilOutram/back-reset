@@ -224,7 +224,7 @@ const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
    seconds (stand / sit / move). Kept in memory and written back on save(). */
 const HISTORY_KEEP_DAYS = 400;
 const MS_PER_DAY        = 24 * 60 * 60 * MS_PER_SEC;
-const DEFAULT_TARGETS   = { release: 2, big3: 1, mobility: 0 };
+const DEFAULT_TARGETS   = { release: 2, big3: 1, flexion: 0, mobility: 0 };
 const DEFAULT_DAY_ONE   = "2026-11-15";   // the day the back first locked up
 
 function parseDay(key) {

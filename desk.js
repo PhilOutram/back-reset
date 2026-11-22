@@ -43,27 +43,27 @@ const Desk = (() => {
       id: "sit", name: "Sit", verb: "sit",
       tones: [[784, 0], [523, 0.2]],
       tip: "Perch with hips higher than knees, or sit right back with a towel roll behind " +
-           "your belt line. Never more than 20 minutes.",
+           "your belt line. Build sitting back up: 20, then 30, then 45 minutes.",
       body: "Hips higher than knees, towel roll behind your belt line.",
     },
     {
       id: "move", name: "Move", verb: "move",
       tones: [[659, 0], [659, 0.18], [880, 0.36]],
-      tip: "Get up the careful way: scoot forward, 5 tiny pelvic tilts, squeeze your glutes, " +
-           "push up with your arms. Then walk, take the stairs, or lie 90/90 legs-up.",
-      body: "Scoot forward, pelvic tilts, glute squeeze - then walk or lie legs-up.",
+      tip: "Get up, walk around or take the stairs, and do 8-10 standing back extensions. " +
+           "Lie 90/90 legs-up only if you're sore.",
+      body: "Walk, take the stairs, and do 8-10 standing back extensions.",
     },
   ];
 
   const PRESETS = [
     { name: "Rain-day", stand: 25, sit: 15, move: 5 },
     { name: "Tired evening", stand: 15, sit: 15, move: 5 },
-    { name: "Standing day", stand: 40, sit: 0, move: 5 },
+    { name: "Rebuild sitting", stand: 15, sit: 30, move: 5 },
   ];
 
   const LIMITS = {
     stand: { min: 5, max: 60, step: 5 },
-    sit:   { min: 0, max: 30, step: 5 },
+    sit:   { min: 0, max: 45, step: 5 },
     move:  { min: 0, max: 15, step: 1 },
   };
 
