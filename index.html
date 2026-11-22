@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Back Reset</title>
+  <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
+  <meta name="theme-color" content="#F7F3ED">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Back Reset">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=0.01">
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <img class="logo-mark" src="icon-192.png" alt="">
+    <div class="header-text">
+      <h1>Back Reset</h1>
+      <p id="headerSub">Calm the alarm · keep moving</p>
+    </div>
+    <div class="header-btns">
+      <button class="btn-round" id="helpBtn" title="How it works" aria-label="How it works">?</button>
+      <button class="btn-round" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="stretch" role="tab">Stretches</button>
+    <button class="tab" data-view="desk" role="tab">Desk timer <span class="live-dot" id="deskDot"></span></button>
+  </nav>
+
+  <!-- ═══ STRETCHES ═══ -->
+  <section class="view visible" id="stretchView">
+    <div class="card">
+
+      <!-- Pick a routine -->
+      <div class="screen pick visible" id="pickScreen">
+        <div class="routine-list" id="routineList"></div>
+        <button class="btn btn-main" id="beginBtn">Begin</button>
+        <p class="fine">Keeps the screen on while you stretch.</p>
+      </div>
+
+      <!-- Playing -->
+      <div class="play" id="playArea">
+        <div class="play-top">
+          <span class="ex-count" id="exCount"></span>
+          <button class="icon-plain" id="voiceBtn" title="Voice on/off" aria-label="Voice on or off">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="wave" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><line class="mute" x1="23" y1="9" x2="17" y2="15"/><line class="mute" x1="17" y1="9" x2="23" y2="15"/></svg>
+          </button>
+        </div>
+
+        <div class="pose" id="pose"><img id="poseImg" alt=""></div>
+
+        <div class="play-row">
+          <div class="timer-wrap">
+            <svg class="timer-svg" viewBox="0 0 120 120">
+              <circle class="timer-track" cx="60" cy="60" r="52"/>
+              <circle class="timer-fill" id="timerRing" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="timer-text"><span class="timer-num" id="timerNum">0</span></div>
+          </div>
+          <div class="play-info">
+            <span class="phase-pill" id="phasePill">Get ready</span>
+            <div class="ex-name" id="exName"></div>
+            <div class="ex-side" id="exSide"></div>
+            <div class="ex-label" id="exLabel"></div>
+          </div>
+        </div>
+
+        <p class="ex-tip" id="exTip"></p>
+
+        <div class="session-bar">
+          <div class="session-track"><div class="session-fill" id="sessionFill"></div></div>
+          <div class="session-label"><span id="nextLabel"></span><span id="sessionLeft"></span></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-icon" id="stopBtn" title="Stop routine" aria-label="Stop routine">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          </button>
+          <button class="btn btn-icon" id="prevBtn" title="Back" aria-label="Previous exercise">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="btn btn-main" id="pauseBtn">Pause</button>
+          <button class="btn btn-icon" id="nextBtn" title="Skip" aria-label="Next exercise">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Done -->
+      <div class="screen" id="doneScreen">
+        <svg class="screen-icon" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="39" stroke="#5A6B4E" stroke-opacity=".4"/><circle cx="40" cy="40" r="32" fill="#5A6B4E" fill-opacity=".06"/><path d="M24 40 L35 51 L56 28" stroke="#5A6B4E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h2>Nicely done</h2>
+        <p id="doneText"></p>
+        <p class="fine" id="doneCount"></p>
+        <button class="btn btn-main" id="againBtn">Back to routines</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ DESK TIMER ═══ -->
+  <section class="view" id="deskView">
+    <div class="card desk-card" id="deskCard" data-phase="idle">
+      <div class="phase-strip" id="phaseStrip"></div>
+
+      <div class="desk-main">
+        <div class="desk-figure" id="deskFigure"></div>
+        <div class="desk-phase" id="deskPhase">Ready</div>
+        <div class="desk-time" id="deskTime">25:00</div>
+        <div class="desk-next" id="deskNext"></div>
+      </div>
+
+      <p class="desk-tip" id="deskTip"></p>
+
+      <button class="desk-banner" id="deskBanner" hidden>Tap to switch the beeps back on</button>
+
+      <div class="controls">
+        <button class="btn btn-icon" id="deskStopBtn" title="Stop" aria-label="Stop desk timer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+        </button>
+        <button class="btn btn-main" id="deskStartBtn">Start</button>
+        <button class="btn btn-icon" id="deskSkipBtn" title="Next position now" aria-label="Next position now">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 18 11 12 5 6"/><polyline points="13 18 19 12 13 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <details class="desk-settings" id="deskSettings">
+      <summary>Timings <span id="deskSummary"></span></summary>
+      <div class="preset-row" id="presetRow"></div>
+      <div class="stepper-list" id="stepperList"></div>
+      <label class="toggle-row">
+        <span><strong>Swap-feet nudge</strong><small>One soft pip while standing</small></span>
+        <select id="nudgeSel">
+          <option value="0">Off</option>
+          <option value="5">Every 5 min</option>
+          <option value="8">Every 8 min</option>
+          <option value="10">Every 10 min</option>
+        </select>
+      </label>
+      <label class="toggle-row">
+        <span><strong>Notifications</strong><small>Shown when the phone is asleep or you're in another app</small></span>
+        <input type="checkbox" id="notifyChk">
+      </label>
+    </details>
+
+    <p class="today" id="deskToday"></p>
+  </section>
+
+  <!-- Help -->
+  <div class="overlay" id="helpOverlay">
+    <div class="modal" role="dialog" aria-labelledby="helpTitle">
+      <div class="modal-head"><h2 id="helpTitle">How it works</h2><button class="modal-close" data-close>&times;</button></div>
+      <div class="modal-body">
+        <h3>Stretches</h3>
+        <ul>
+          <li><strong>Back Release</strong> - the Phase 1 mobility set. Do it twice a day once you're warmed up, and before bed.</li>
+          <li><strong>McGill Big 3</strong> - short braced holds in a 3-2-1 pyramid, once a day mid-day. Switch to 5-3-1 in Settings once it's pain-free.</li>
+          <li><strong>Hips &amp; Mid-Back</strong> - Phase 2 extras for when the stiffness has eased.</li>
+          <li>Each exercise starts with a few seconds to get into position. Pips count you in; the voice can be muted.</li>
+          <li>The screen stays on while a routine is running.</li>
+        </ul>
+        <h3>Desk timer</h3>
+        <ul>
+          <li>Cycles <strong>Stand → Sit → Move</strong>. The default is the rain-day plan: 25 / 15 / 5.</li>
+          <li>Each change gets a short beep-beep - rising for stand, falling for sit, three notes for move.</li>
+          <li>It keeps working with the screen off: leave this page open (don't swipe it away) and the phone can sleep.</li>
+          <li>Tap a position in the strip to jump straight to it, e.g. if you sat down early.</li>
+        </ul>
+        <h3>Remember</h3>
+        <ul>
+          <li>Pain-free middle range only. A mild stretch is fine; a sharp pinch means back off.</li>
+          <li>Before standing up from a chair: scoot forward, 5 tiny pelvic tilts, squeeze your glutes, push up with your arms.</li>
+          <li>Numbness, tingling or weakness down a leg, or any bladder or bowel change: get checked promptly.</li>
+        </ul>
+        <p class="fine">Based on your recovery plan. Not a substitute for your physio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="overlay" id="settingsOverlay">
+    <div class="modal" role="dialog" aria-labelledby="settingsTitle">
+      <div class="modal-head"><h2 id="settingsTitle">McGill Big 3</h2><button class="modal-close" data-close>&times;</button></div>
+      <div class="modal-body">
+        <p>Applies the next time you begin the Big 3.</p>
+        <div class="choice-group" data-opt="pyramid">
+          <span class="choice-label">Pyramid</span>
+          <button data-val="3-2-1">3-2-1 <small>while sensitive</small></button>
+          <button data-val="5-3-1">5-3-1 <small>once pain-free</small></button>
+        </div>
+        <div class="choice-group" data-opt="holdSecs">
+          <span class="choice-label">Hold</span>
+          <button data-val="8">8 s</button>
+          <button data-val="10">10 s</button>
+        </div>
+        <div class="choice-group" data-opt="restSecs">
+          <span class="choice-label">Rest between sets</span>
+          <button data-val="20">20 s</button>
+          <button data-val="30">30 s</button>
+        </div>
+        <p class="fine" id="big3Summary"></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="version.js?v=0.01"></script>
+<script src="core.js?v=0.01"></script>
+<script src="routines.js?v=0.01"></script>
+<script src="stretch.js?v=0.01"></script>
+<script src="desk.js?v=0.01"></script>
+<script src="app.js?v=0.01"></script>
+</body>
+</html>
