@@ -1,10 +1,22 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.04";
+const VERSION = "v0.05";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.05",
+    date: "2026-11-22",
+    notes: [
+      "Back Release now always moves downhill (standing, hands and knees, front, back), " +
+        "so you never push up off your front onto all fours.",
+      "Each exercise says how to get into position the easy way, with more time for " +
+        "changes of position.",
+      "Moving exercises are paced: cat-cow, bridges, roll-downs and more show Arch / Round " +
+        "style cues with a soft pip.",
+    ],
+  },
   {
     version: "v0.04",
     date: "2026-11-22",

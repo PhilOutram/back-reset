@@ -14,13 +14,15 @@
 
 const LEAD_IN_FIRST = 10;   // seconds to get down to the floor for the first exercise
 const LEAD_IN       = 6;    // seconds between exercises
-const SWITCH_SECS   = 5;    // seconds to swap sides
+const MOVE_SECS     = 20;   // seconds for a change of position (floor <-> standing etc.)
+const SWITCH_SECS   = 5;    // seconds to swap sides (an exercise can set switchSecs)
 const RELAX_SECS    = 3;    // reset between two holds of the same set
 
 const EXERCISES = {
   standingExt: {
     name: "Standing Back Extension",
     short: "Extension",
+    pace: [["Lean back", 3], ["Upright", 2]],
     img: "poses/standing-extension.svg",
     tip: "Hands on the small of your back. Lean back gently for 2-3 s, then upright. 8-10 reps.",
     say: "Standing back extensions. Hands on the small of your back, lean gently backwards, " +
@@ -38,6 +40,7 @@ const EXERCISES = {
   catCow: {
     name: "Mid-Range Cat-Cow",
     short: "Cat-Cow",
+    pace: [["Gentle arch", 4], ["Flat back", 4]],
     img: "poses/cat-cow.webp",
     tip: "About 8 slow reps between a gentle arch and a flat back. No deep rounding.",
     say: "Mid range cat cow. On hands and knees, move slowly between a gentle arch " +
@@ -55,15 +58,17 @@ const EXERCISES = {
   gluteBridge: {
     name: "Glute Bridge",
     short: "Bridge",
+    pace: [["Lift", 3], ["Lower", 3]],
     img: "poses/glute-bridge.svg",
     tip: "Knees bent. Squeeze your glutes and lift into a line from knees to shoulders. " +
-         "2 slow sets of 10.",
+         "10 slow reps.",
     say: "Glute bridge. On your back, knees bent. Squeeze your glutes and lift your hips, " +
          "then lower slowly.",
   },
   catCowFull: {
     name: "Full-Range Cat-Cow",
     short: "Cat-Cow",
+    pace: [["Arch", 4], ["Round", 4]],
     img: "poses/cat-cow.webp",
     tip: "Now use more range: round up into the cat as far as is comfortable. Stop at mild " +
          "discomfort.",
@@ -73,6 +78,7 @@ const EXERCISES = {
   kneeHug: {
     name: "Knee Hug",
     short: "Knee hug",
+    pace: [["Draw in", 3], ["Ease off", 3]],
     img: "poses/knee-hug.svg",
     tip: "On your back, gently draw both knees towards your chest, then ease off. Mild " +
          "stretch only.",
@@ -82,6 +88,7 @@ const EXERCISES = {
   rollDown: {
     name: "Standing Roll-Down",
     short: "Roll-down",
+    pace: [["Roll down", 4], ["Roll up", 4]],
     img: "poses/roll-down.svg",
     tip: "Soft knees. Slowly roll down towards your shins, then roll back up. 6-8 reps.",
     say: "Standing roll down. Soft knees, slowly roll down towards your shins, then roll " +
@@ -90,6 +97,7 @@ const EXERCISES = {
   splitSquat: {
     name: "Split Squat",
     short: "Split squat",
+    pace: [["Lower", 3], ["Up", 2]],
     img: "poses/split-squat.svg",
     tip: "Chest tall, front shin upright. Lower the back knee towards the floor. 8 slow reps.",
     say: "Split squat. One foot forward, chest tall. Lower your back knee towards the " +
@@ -125,6 +133,7 @@ const EXERCISES = {
   sidePlank: {
     name: "Side Plank",
     short: "Side plank",
+    switchSecs: 8,
     img: "poses/side-plank.webp",
     tip: "Elbow under shoulder, knees bent to start. Hips forward and up, top hip stacked.",
     say: "Side plank. Elbow under your shoulder, knees bent. Push your hips forward and up.",
@@ -142,6 +151,7 @@ const EXERCISES = {
   hipSwitch: {
     name: "90/90 Hip Switches",
     short: "Hip switch",
+    pace: [["Knees left", 4], ["Knees right", 4]],
     img: "poses/hip-switch-9090.webp",
     tip: "Hands behind you, chest tall. Slowly windscreen-wipe both knees side to side.",
     say: "Ninety ninety hip switches. Sit tall with your hands behind you and slowly " +
@@ -150,6 +160,8 @@ const EXERCISES = {
   openBook: {
     name: "Open-Book Rotation",
     short: "Open book",
+    pace: [["Open", 3], ["Close", 3]],
+    switchSecs: 8,
     img: "poses/open-book.webp",
     tip: "Knees stacked at 90 degrees so the lower back stays still. Open the top arm slowly.",
     say: "Open book. Lie on your side with your knees stacked, and slowly open your top " +
@@ -159,6 +171,7 @@ const EXERCISES = {
   hipHinge: {
     name: "Dowel Hip Hinge",
     short: "Hinge",
+    pace: [["Hinge back", 3], ["Stand tall", 2]],
     img: "poses/hip-hinge.webp",
     tip: "Stick touching head, upper back and tailbone. Push hips back to 45 degrees. 8 reps.",
     say: "Hip hinge. Hold a stick along your spine, touching your head, upper back and " +
@@ -167,6 +180,7 @@ const EXERCISES = {
   pallof: {
     name: "Pallof Press",
     short: "Pallof",
+    switchSecs: 8,
     img: "poses/pallof-press.webp",
     tip: "Band at chest height. Brace and press straight out - don't let it twist you.",
     say: "Pallof press. Band anchored at chest height. Brace and press your hands " +
@@ -191,22 +205,26 @@ function seg(ex, kind, secs, extra = {}) {
   return { ex, kind, secs, label: "", side: null, say: null, ...extra };
 }
 
-// The opening "get into position" segment for an exercise.
-function intro(ex, secs, side = null) {
+// The opening "get into position" segment for an exercise. `how` says how to get there
+// from the previous position, so a relaxed back is never asked to heave you straight up.
+function intro(ex, secs, side = null, how = null) {
   const e = EXERCISES[ex];
-  return seg(ex, "ready", secs, { side, say: e.say + (side ? ` ${side}.` : ""), intro: true });
+  const say = (how ? `${how} ` : "") + e.say + (side ? ` ${side}.` : "");
+  return seg(ex, "ready", secs, { side, say, how, intro: true });
 }
 
 function switchSide(ex, side) {
-  return seg(ex, "ready", SWITCH_SECS, { side, say: `Switch sides. ${side}.` });
+  const secs = EXERCISES[ex].switchSecs || SWITCH_SECS;
+  return seg(ex, "ready", secs, { side, say: `Switch sides. ${side}.` });
 }
 
-// A single continuous hold, on one side or both.
-function timed(ex, secs, leadIn, label = "") {
+// A continuous exercise, on one side or both. opts: { label, how }.
+function timed(ex, secs, leadIn, opts = {}) {
   const e = EXERCISES[ex];
-  if (!e.sides) return [intro(ex, leadIn), seg(ex, "timed", secs, { label })];
+  const label = opts.label || "";
+  if (!e.sides) return [intro(ex, leadIn, null, opts.how), seg(ex, "timed", secs, { label })];
   return [
-    intro(ex, leadIn, e.sides[0]),
+    intro(ex, leadIn, e.sides[0], opts.how),
     seg(ex, "timed", secs, { side: e.sides[0], label }),
     switchSide(ex, e.sides[1]),
     seg(ex, "timed", secs, { side: e.sides[1], label }),
@@ -216,7 +234,7 @@ function timed(ex, secs, leadIn, label = "") {
 // McGill "Russian pyramid": e.g. 3 holds, rest, 2 holds, rest, 1 hold - each side.
 // An exercise with `halves` (the curl-up) swaps legs once, after the first set, so a 3-2-1
 // pyramid comes out 3 reps each way.
-function pyramid(ex, opts, leadIn) {
+function pyramid(ex, opts, leadIn, how = null) {
   const e = EXERCISES[ex];
   const sets = PYRAMIDS[opts.pyramid] || PYRAMIDS["3-2-1"];
   const sides = e.sides || [null];
@@ -225,7 +243,7 @@ function pyramid(ex, opts, leadIn) {
     const half = e.halves ? e.halves[setIdx === 0 ? 0 : 1] : null;
     sides.forEach((s, sideIdx) => {
       const side = s || half;
-      if (setIdx === 0 && sideIdx === 0) out.push(intro(ex, leadIn, side));
+      if (setIdx === 0 && sideIdx === 0) out.push(intro(ex, leadIn, side, how));
       else if (sideIdx > 0) out.push(switchSide(ex, side));
       for (let r = 1; r <= reps; r++) {
         const label = `Set ${setIdx + 1} of ${sets.length} · Rep ${r} of ${reps}`;
@@ -253,15 +271,26 @@ const ROUTINES = [
     id: "release",
     name: "Back Release",
     when: "Twice a day, once warmed up · and before bed",
-    blurb: "Standing extensions, Sphinx, mid-range cat-cow, hip rotation each side, glute " +
-           "bridges, then 2 minutes of legs-up rest.",
+    blurb: "Standing extensions, mid-range cat-cow, Sphinx, hip rotation each side, glute " +
+           "bridges, then 2 minutes of legs-up rest. Always moving downwards.",
+    // Ordered standing -> hands and knees -> front -> back, so every change of position
+    // is downhill and nothing asks a relaxed back to push you back up off the floor.
     build: () => [
-      ...timed("standingExt", 40, LEAD_IN_FIRST),
-      ...timed("sphinx", 90, LEAD_IN),
-      ...timed("catCow", 60, LEAD_IN),
-      ...timed("hipRotation", 20, LEAD_IN),
+      ...timed("standingExt", 40, LEAD_IN_FIRST, { how: "Stand tall, feet hip-width apart." }),
+      ...timed("catCow", 64, MOVE_SECS, {
+        how: "Get down the easy way. Hold something steady, step back into a half kneel, " +
+             "lower the other knee, then put your hands down.",
+      }),
+      ...timed("sphinx", 90, LEAD_IN + 6, {
+        how: "From hands and knees, walk your hands forward and let your hips lower until " +
+             "you are lying on your front.",
+      }),
+      ...timed("hipRotation", 20, MOVE_SECS, {
+        how: "Squeeze your glutes and brace lightly, then roll onto your side as one piece, " +
+             "and on to your back with your knees bent.",
+      }),
       ...timed("gluteBridge", 60, LEAD_IN),
-      ...timed("legsUp", 120, LEAD_IN),
+      ...timed("legsUp", 120, LEAD_IN + 6, { how: "Shuffle up to the chair or sofa." }),
     ],
   },
   {
@@ -270,9 +299,10 @@ const ROUTINES = [
     when: "Once a day, mid-day · not in the first hour after waking",
     blurb: "Short braced holds in a pyramid. Breathe behind the brace, stop if it pinches.",
     build: (opts) => [
-      ...pyramid("curlUp", opts, LEAD_IN_FIRST),
-      ...pyramid("sidePlank", opts, LEAD_IN),
-      ...pyramid("birdDog", opts, LEAD_IN),
+      ...pyramid("curlUp", opts, MOVE_SECS, "Get down the easy way and lie on your back."),
+      ...pyramid("sidePlank", opts, LEAD_IN + 6,
+        "Roll onto your left side, elbow under your shoulder, knees bent."),
+      ...pyramid("birdDog", opts, LEAD_IN + 6, "From your side, push up onto hands and knees."),
     ],
   },
   {
@@ -282,9 +312,16 @@ const ROUTINES = [
     blurb: "Gently brings forward bending back: full cat-cow, knee hugs and slow roll-downs, " +
            "finishing with extensions.",
     build: () => [
-      ...timed("catCowFull", 60, LEAD_IN_FIRST),
-      ...timed("kneeHug", 45, LEAD_IN),
-      ...timed("rollDown", 60, LEAD_IN),
+      ...timed("catCowFull", 64, MOVE_SECS, {
+        how: "Get down the easy way: half kneel, lower the other knee, hands down.",
+      }),
+      ...timed("kneeHug", 48, LEAD_IN + 6, {
+        how: "Lower onto your side, then roll onto your back.",
+      }),
+      ...timed("rollDown", 64, MOVE_SECS, {
+        how: "Brace lightly, roll onto your side, push up onto hands and knees, then half " +
+             "kneel and stand up.",
+      }),
       ...timed("standingExt", 30, LEAD_IN),
     ],
   },
@@ -295,14 +332,23 @@ const ROUTINES = [
     blurb: "Hip switches, open book, dowel hinge, Pallof press, split squats and a wall sit. " +
            "Needs a stick and a band.",
     build: () => [
-      ...timed("hipSwitch", 60, LEAD_IN_FIRST),
-      ...timed("openBook", 40, LEAD_IN),
-      ...timed("hipHinge", 45, LEAD_IN, "Set 1 of 2"),
+      ...timed("hipSwitch", 64, MOVE_SECS, {
+        how: "Sit on the floor, knees bent, hands on the floor behind you.",
+      }),
+      ...timed("openBook", 42, LEAD_IN + 6, {
+        how: "Lie on your left side with your knees stacked at ninety degrees.",
+      }),
+      ...timed("hipHinge", 45, MOVE_SECS, {
+        label: "Set 1 of 2",
+        how: "Get up the easy way: hands and knees, half kneel, then stand. Pick up your stick.",
+      }),
       seg("hipHinge", "rest", 20, { label: "Rest before set 2", say: "Rest." }),
       seg("hipHinge", "timed", 45, { label: "Set 2 of 2" }),
-      ...timed("pallof", 40, LEAD_IN),
-      ...timed("splitSquat", 40, LEAD_IN),
-      ...timed("wallSit", 30, LEAD_IN, "Set 1 of 2"),
+      ...timed("pallof", 40, LEAD_IN + 6, {
+        how: "Hold the band, anchored at chest height, and step out sideways.",
+      }),
+      ...timed("splitSquat", 40, LEAD_IN, { how: "Step into a long split stance." }),
+      ...timed("wallSit", 30, LEAD_IN + 4, { label: "Set 1 of 2", how: "Find a clear bit of wall." }),
       seg("wallSit", "rest", 20, { label: "Rest before set 2", say: "Rest." }),
       seg("wallSit", "timed", 30, { label: "Set 2 of 2" }),
     ],

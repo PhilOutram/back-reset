@@ -40,6 +40,7 @@ const Stretch = (() => {
   let paused   = false;
   let ticker   = null;
   let lastWhole = null;
+  let paceKey  = null;
 
   els.ring.style.strokeDasharray = RING_CIRC;
 
@@ -123,7 +124,7 @@ const Stretch = (() => {
     els.name.textContent = e.name;
     els.side.textContent = s.side || "";
     els.label.textContent = s.label || "";
-    els.tip.textContent = e.tip;
+    els.tip.textContent = s.kind === "ready" && s.how ? s.how : e.tip;
     els.pill.textContent = PHASE_TEXT[s.kind];
     els.play.dataset.kind = s.kind;
     els.next.textContent = nextExerciseName();
@@ -150,7 +151,7 @@ const Stretch = (() => {
         Voice.speak(s.say);
         break;
       case "timed":
-        Sound.seq([[880, 0]], 0.22);
+        if (!EXERCISES[s.ex].pace) Sound.seq([[880, 0]], 0.22);
         break;
       case "hold":
         Sound.seq([[880, 0]], 0.22);
@@ -175,6 +176,39 @@ const Stretch = (() => {
     }
   }
 
+  /* ── Pacing ──────────────────────────────────────────────────
+     Moving exercises (cat-cow, bridges, roll-downs...) carry a `pace` such as
+     [["Arch", 4], ["Round", 4]]: each half gets a soft pip, the word on screen and,
+     with voice on, the word spoken - so you move with the rhythm instead of holding. */
+  const PACE_FREQS = [660, 520];
+  const PACE_VOL   = 0.12;
+  const PACE_TAIL_MS = 1200;   // no new cue this close to the end of the exercise
+
+  function paceAt(pace, t) {
+    const cycle = pace.reduce((sum, [, d]) => sum + d, 0);
+    const rep = Math.floor(t / cycle);
+    let r = t - rep * cycle;
+    let i = 0;
+    while (i < pace.length - 1 && r >= pace[i][1]) { r -= pace[i][1]; i++; }
+    return { rep, i };
+  }
+
+  function paceTick() {
+    const s = plan.segments[idx];
+    const pace = EXERCISES[s.ex].pace;
+    if (s.kind !== "timed" || !pace) return;
+    const leftMs = Math.max(0, endsAt - Date.now());
+    const { rep, i } = paceAt(pace, s.secs - leftMs / MS_PER_SEC);
+    const key = `${idx}:${rep}:${i}`;
+    if (key === paceKey) return;
+    paceKey = key;
+    els.pill.textContent = pace[i][0];
+    els.label.textContent = (s.label ? `${s.label} · ` : "") + `Rep ${rep + 1}`;
+    if (leftMs < PACE_TAIL_MS) return;
+    Sound.pip(PACE_FREQS[i % PACE_FREQS.length], PACE_VOL);
+    Voice.speak(pace[i][0]);
+  }
+
   /* ── Engine ────────────────────────────────────────────────── */
   function enter(i, announce = true) {
     idx = i;
@@ -182,9 +216,13 @@ const Stretch = (() => {
     endsAt = Date.now() + s.secs * MS_PER_SEC;
     remainMs = s.secs * MS_PER_SEC;
     lastWhole = null;
+    paceKey = null;
     renderSegment();
     renderClock();
-    if (announce && !paused) cueEnter(s);
+    if (announce && !paused) {
+      cueEnter(s);
+      paceTick();
+    }
   }
 
   function tick() {
@@ -197,6 +235,7 @@ const Stretch = (() => {
       endsAt = carry + plan.segments[idx].secs * MS_PER_SEC;
     }
     const left = renderClock();
+    paceTick();
     if (left !== lastWhole) {
       lastWhole = left;
       cueTick(plan.segments[idx], left);
@@ -268,8 +307,8 @@ const Stretch = (() => {
     const n = bumpTally(id);
     teardown();
     plan = null;
-    els.doneText.textContent = `${name} complete. Get up slowly - roll to your side ` +
-      "and push up with your arms.";
+    els.doneText.textContent = `${name} complete. Getting up: brace lightly, roll onto ` +
+      "your side as one piece, push up to hands and knees, then half-kneel and stand.";
     const target = Targets.get()[id] || 0;
     els.doneCount.textContent = target > 0 ?
       `That's ${n} of ${target} today${n >= target ? " - target met" : ""}.` :
