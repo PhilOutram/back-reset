@@ -6,7 +6,7 @@
 // Bump V on every release, in step with version.js and the ?v= stamps in index.html.
 // CSS/JS are cached under their exact stamped URLs: never match ignoring the query, or an
 // old worker hands the new page last release's scripts and it breaks on first open.
-const V = "0.20";
+const V = "0.21";
 const CACHE = `back-reset-v${V}`;
 const STAMPED = ["styles.css", "version.js", "core.js", "routines.js", "stretch.js",
   "desk.js", "pain.js", "log.js", "app.js"].map((f) => `${f}?v=${V}`);
