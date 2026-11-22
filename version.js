@@ -1,10 +1,20 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.13";
+const VERSION = "v0.14";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.14",
+    date: "2026-11-22",
+    notes: [
+      "Each phase is its own pill at the top of the Stretches tab - filled for the phase " +
+        "you're in, outlined for the other. Tap one to see its plan; the other phase's " +
+        "plan holds the switch.",
+      "Tap a routine's card to start it - no more Begin button.",
+    ],
+  },
   {
     version: "v0.13",
     date: "2026-11-22",

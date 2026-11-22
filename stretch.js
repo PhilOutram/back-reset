@@ -23,9 +23,8 @@ const Stretch = (() => {
   const $ = (id) => document.getElementById(id);
   const els = {
     pick: $("pickScreen"), play: $("playArea"), done: $("doneScreen"),
-    list: $("routineList"), begin: $("beginBtn"),
-    planNow: $("planNow"), planBody: $("planBody"),
-    phaseChoice: $("phaseChoice"), phaseNote: $("phaseNote"),
+    list: $("routineList"),
+    plan: $("planNote"),
     exCount: $("exCount"), poseImg: $("poseImg"), pose: $("pose"),
     ring: $("timerRing"), num: $("timerNum"), pill: $("phasePill"),
     name: $("exName"), side: $("exSide"), label: $("exLabel"), tip: $("exTip"),
@@ -69,17 +68,6 @@ const Stretch = (() => {
       `${phase2 ? "Phase 2" : "Phases 1 and 2"}${hint}</span>`;
   }
 
-  // The two-phase plan above the cards, collapsed to one line naming today's phase.
-  function renderPlan() {
-    const now = Phase.info();
-    els.planNow.textContent = `${now.name} · you are here`;
-    els.planBody.innerHTML = PHASES.map((p, i) => {
-      const to = PHASES[i + 1] ? `-${PHASES[i + 1].fromDay - 1}` : " on";
-      return `<p class="${p === now ? "now" : ""}"><b>${p.name}</b> ` +
-        `<span>Day ${p.fromDay}${to}</span><br>${p.plan}</p>`;
-    }).join("") + '<p class="plan-more">Switch phase at the bottom of this page.</p>';
-  }
-
   function badgeFor(n, target) {
     if (target > 0) {
       const met = n >= target ? " met" : "";
@@ -88,43 +76,73 @@ const Stretch = (() => {
     return n ? `<span class="done-badge">${n}× today</span>` : "";
   }
 
-  /* ── Phase switch (bottom of the picker) ───────────────────── */
+  /* ── Phase pills (top of the picker) ──────────────────────────
+     A pill per phase, side by side: filled for the phase you're in, outlined for the
+     other. Tapping one opens its plan below; the other phase's plan holds the switch. */
   const READY_FOR_TWO = "Phase 2 is for once the spasms have stopped, everyday moves " +
     "(getting up, walking, socks on) are mostly comfortable and pain is mostly 3/10 or less.";
+  let openPill = null;           // the phase whose pill is open, if any
 
-  function renderPhaseSwitch() {
+  // How you got to today's phase, shown inside its pill.
+  function phaseStatus() {
     const n = Targets.dayNumber();
     const p = Phase.of();
-    els.phaseChoice.querySelectorAll("button").forEach((b) => {
-      b.classList.toggle("active", Number(b.dataset.phase) === p);
-    });
-    let lead;
     if (p === 2 && !Phase.chosen() && n >= PHASE_TWO_DAY) {
-      lead = `Moved to Phase 2 automatically at Day ${PHASE_TWO_DAY}.`;
-    } else if (p === 2) {
-      lead = n < PHASE_TWO_DAY ? "You've moved on early." : "You're in Phase 2.";
-    } else if (n < PHASE_TWO_DAY) {
-      lead = `Moves to Phase 2 by itself on Day ${PHASE_TWO_DAY}, in ` +
-        `${plural(PHASE_TWO_DAY - n, "day")}.`;
-    } else {
-      lead = "You're staying in Phase 1 for now.";
+      return `Moved to Phase 2 automatically at Day ${PHASE_TWO_DAY}.`;
     }
-    const tail = p === 2 ?
-      "Not there yet? Switch back to Phase 1 - it stays there until you move on." :
-      "Switch to Phase 2 whenever you're ready.";
-    els.phaseNote.textContent = `${lead} ${READY_FOR_TWO} ${tail} Each day remembers its ` +
-      "phase, and the daily targets follow it.";
+    if (p === 2) return n < PHASE_TWO_DAY ? "You moved on early." : "You're in Phase 2.";
+    if (n < PHASE_TWO_DAY) {
+      return `Moves to Phase 2 by itself on Day ${PHASE_TWO_DAY}, in ` +
+        `${plural(PHASE_TWO_DAY - n, "day")}.`;
+    }
+    return "You're staying in Phase 1 until you move on.";
   }
 
-  els.phaseChoice.addEventListener("click", (e) => {
-    const b = e.target.closest("button[data-phase]");
-    if (b) Phase.set(Number(b.dataset.phase));
+  function renderPlan() {
+    const now = Phase.of();
+    const pills = PHASES.map((p, i) => {
+      const here = p.n === now;
+      const to = PHASES[i + 1] ? `-${PHASES[i + 1].fromDay - 1}` : " on";
+      const cls = `${here ? " here" : ""}${openPill === p.n ? " open" : ""}`;
+      return `<button class="stage-pill${cls}"` +
+        ` data-phase="${p.n}" aria-expanded="${openPill === p.n}"><b>${p.name}</b>` +
+        `<span>Day ${p.fromDay}${to}` +
+        `${here ? ' · <em class="stage-here">you are here</em>' : ""}</span></button>`;
+    }).join("");
+    let body = "";
+    if (openPill) {
+      const p = PHASES[openPill - 1];
+      const here = p.n === now;
+      const notes = [p.plan];
+      if (here) notes.push(`${phaseStatus()} Each day remembers its phase.`);
+      if (p.n === 2) notes.push(READY_FOR_TWO);
+      if (!here && p.n === 1) notes.push("Not there yet? Go back - it stays in Phase 1 " +
+        "until you move on.");
+      const go = here ? "" :
+        `<button class="stage-go" data-phase="${p.n}">Switch to Phase ${p.n}</button>`;
+      body = `<div class="stage-body${here ? " here" : ""}">` +
+        notes.map((t) => `<p>${t}</p>`).join("") + `${go}</div>`;
+    }
+    els.plan.innerHTML = `<div class="stage-row">${pills}</div>${body}`;
+  }
+
+  els.plan.addEventListener("click", (e) => {
+    const go = e.target.closest(".stage-go");
+    if (go) {
+      openPill = null;
+      Phase.set(Number(go.dataset.phase));
+      return;
+    }
+    const pill = e.target.closest(".stage-pill");
+    if (!pill) return;
+    const n = Number(pill.dataset.phase);
+    openPill = openPill === n ? null : n;
+    renderPlan();
   });
 
   /* ── Routine picker ────────────────────────────────────────── */
   function renderPicker() {
     renderPlan();
-    renderPhaseSwitch();
     const today = History.day();
     const targets = Targets.get(Phase.of());
     const opts = big3Options();
@@ -133,12 +151,12 @@ const Stretch = (() => {
       const badge = badgeFor(today[r.id] || 0, targets[r.id] || 0) || "<span></span>";
       const blurb = typeof r.blurb === "function" ? r.blurb(opts) : r.blurb;
       return `
-        <button class="routine ${r.id === selected ? "selected" : ""}" data-id="${r.id}">
+        <button class="routine" data-id="${r.id}" aria-label="Start ${r.name}">
           <span class="routine-name">${r.name}</span>
           <span class="routine-when">${r.when}</span>
           <span class="routine-blurb">${blurb}</span>
           <span class="routine-foot">${badge}${phaseTag(r)}
-            <span class="routine-mins">${mins} min</span></span>
+            <span class="routine-go">▶ ${mins} min</span></span>
         </button>`;
     }).join("");
   }
@@ -146,9 +164,10 @@ const Stretch = (() => {
   els.list.addEventListener("click", (e) => {
     const btn = e.target.closest(".routine");
     if (!btn) return;
+    // Tapping a card starts it; every routine opens with time to get into position.
     selected = btn.dataset.id;
     Store.set("routine", selected);
-    renderPicker();
+    start();
   });
 
   /* ── Pose images ───────────────────────────────────────────── */
@@ -406,7 +425,6 @@ const Stretch = (() => {
     els.voice.classList.toggle("muted", !Voice.isOn());
   }
 
-  els.begin.addEventListener("click", start);
   els.pause.addEventListener("click", togglePause);
   els.skip.addEventListener("click", skip);
   els.prev.addEventListener("click", back);
