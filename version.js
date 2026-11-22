@@ -1,10 +1,17 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.09";
+const VERSION = "v0.10";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.10",
+    date: "2026-11-22",
+    notes: [
+      "New illustrations for standing extensions, glute bridges, roll-downs and split squats.",
+    ],
+  },
   {
     version: "v0.09",
     date: "2026-11-22",

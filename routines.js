@@ -27,7 +27,7 @@ const EXERCISES = {
     name: "Standing Back Extension",
     short: "Extension",
     pace: [["Lean back", 3], ["Upright", 2]],
-    img: "poses/standing-extension.svg",
+    img: "poses/standing-extension.webp",
     tip: "Hands on the small of your back. Lean back gently for 2-3 s, then upright. 8-10 reps.",
     say: "Standing back extensions. Hands on the small of your back, lean gently backwards, " +
          "then come back up. Mild pressure only.",
@@ -63,7 +63,7 @@ const EXERCISES = {
     name: "Glute Bridge",
     short: "Bridge",
     pace: [["Lift", 3], ["Lower", 3]],
-    img: "poses/glute-bridge.svg",
+    img: "poses/glute-bridge.webp",
     tip: "Knees bent. Squeeze your glutes and lift into a line from knees to shoulders. " +
          "10 slow reps.",
     say: "Glute bridge. On your back, knees bent. Squeeze your glutes and lift your hips, " +
@@ -93,7 +93,7 @@ const EXERCISES = {
     name: "Standing Roll-Down",
     short: "Roll-down",
     pace: [["Roll down", 4], ["Roll up", 4]],
-    img: "poses/roll-down.svg",
+    img: "poses/roll-down.webp",
     tip: "Soft knees. Slowly roll down towards your shins, then roll back up. 6-8 reps.",
     say: "Standing roll down. Soft knees, slowly roll down towards your shins, then roll " +
          "back up. Stop at mild discomfort.",
@@ -102,8 +102,9 @@ const EXERCISES = {
     name: "Split Squat",
     short: "Split squat",
     pace: [["Lower", 3], ["Up", 2]],
-    img: "poses/split-squat.svg",
-    tip: "Chest tall, front shin upright. Lower the back knee towards the floor. 8 slow reps.",
+    img: "poses/split-squat.webp",
+    tip: "Chest tall, front shin upright, back foot on the floor (a step behind is a " +
+         "harder version for later). Lower the back knee towards the floor. 8 slow reps.",
     say: "Split squat. One foot forward, chest tall. Lower your back knee towards the " +
          "floor and drive back up.",
     sides: ["Left foot forward", "Right foot forward"],
