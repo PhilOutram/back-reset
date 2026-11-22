@@ -310,6 +310,7 @@ const Pain = (() => {
     if (onMap(draft)) els.mini.innerHTML = figure() + pendingMarker(draft, MARK_R_MINI);
     renderEditor();
     els.overlay.classList.add("visible");
+    BackNav.open("painEditor", () => closeEditor(true));
   }
   function renderEditor() {
     els.levels.innerHTML = Array.from({ length: MAX_LEVEL + 1 }, (_, n) =>
@@ -348,10 +349,12 @@ const Pain = (() => {
   }
   els.when.addEventListener("input", renderWhenDay);
 
-  function closeEditor() {
+  // fromBack: the back gesture already used up the history entry.
+  function closeEditor(fromBack = false) {
     els.overlay.classList.remove("visible");
     draft = null;
     clearPending();
+    if (!fromBack) BackNav.closed("painEditor");
   }
 
   els.save.addEventListener("click", () => {

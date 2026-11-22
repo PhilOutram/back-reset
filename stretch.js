@@ -67,8 +67,8 @@ const Stretch = (() => {
       hint = left > 0 ? `in ${plural(left, "day")}` : "when you move on";
       hint = ` <span class="day-hint">· ${hint}</span>`;
     }
-    return `<span class="routine-phase">From Day ${r.fromDay} · ` +
-      `${phase2 ? "Phase 2" : "Phases 1 and 2"}${hint}</span>`;
+    return `<span class="routine-phase">Day ${r.fromDay} on · ` +
+      `${phase2 ? "Phase 2" : "Phases 1 &amp; 2"}${hint}</span>`;
   }
 
   function badgeFor(n, target) {
@@ -348,6 +348,18 @@ const Stretch = (() => {
     ticker = setInterval(tick, TICK_MS);
     Wake.on("stretch");
     document.dispatchEvent(new CustomEvent("stretch:state", { detail: true }));
+    BackNav.open("stretch", onBackGesture);
+  }
+
+  // Back gesture: while a routine runs, ask first (a stray swipe shouldn't lose it); from
+  // the finish screen, go back to the list.
+  function onBackGesture() {
+    if (plan && !confirm("Stop this routine?")) {
+      BackNav.open("stretch", onBackGesture);
+      return;
+    }
+    if (plan) { teardown(); plan = null; }
+    showPicker();
   }
 
   function togglePause() {
@@ -416,6 +428,12 @@ const Stretch = (() => {
     teardown();
     plan = null;
     showPicker();
+    BackNav.closed("stretch");
+  }
+
+  function doneToPicker() {
+    showPicker();
+    BackNav.closed("stretch");
   }
 
   function showPicker() {
@@ -433,7 +451,7 @@ const Stretch = (() => {
   els.skip.addEventListener("click", skip);
   els.prev.addEventListener("click", back);
   els.stop.addEventListener("click", stop);
-  els.again.addEventListener("click", showPicker);
+  els.again.addEventListener("click", doneToPicker);
   els.voice.addEventListener("click", () => { Voice.toggle(); renderVoice(); });
 
   // Catch up straight away when the page comes back (screen was off, app switch).

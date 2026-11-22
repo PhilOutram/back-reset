@@ -1,10 +1,20 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.17";
+const VERSION = "v0.18";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.18",
+    date: "2026-11-22",
+    notes: [
+      "The back gesture now steps back inside the app: out of a routine (it asks first), " +
+        "off the finish screen, or out of a dialog - instead of leaving the app.",
+      "Routine cards look like buttons: white, raised, with a solid start button. Both " +
+        "phase pills share the cards' light outline; only today's phase is filled.",
+    ],
+  },
   {
     version: "v0.17",
     date: "2026-11-22",

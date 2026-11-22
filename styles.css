@@ -1052,3 +1052,26 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
 }
 .labels-btn.on { border-color: var(--moss); background-color: rgba(90,107,78,.12); color: var(--moss); }
 .screen p.pick-note { max-width: none; }
+
+/* ── Routine cards as buttons (v0.18) ───────────────────────── */
+.routine {
+  background-color: #FFFFFF;
+  border-color: rgba(107,91,78,.18);
+  box-shadow: 0 1px 2px rgba(44,34,24,.08), 0 3px 8px rgba(44,34,24,.07);
+}
+.routine:hover { border-color: var(--amber); box-shadow: 0 2px 4px rgba(44,34,24,.1),
+                                                          0 6px 14px rgba(44,34,24,.1); }
+.routine:active { transform: scale(.98); box-shadow: 0 1px 2px rgba(44,34,24,.1); }
+.routine-go {
+  background-color: var(--amber);
+  color: #FFFFFF;
+  padding: 4px 11px;
+  box-shadow: 0 1px 2px rgba(44,34,24,.15);
+}
+.routine.not-yet { box-shadow: none; }
+.routine-foot .routine-phase { white-space: nowrap; }
+/* Phase pills: the same light outline as the routine cards; only today's phase is filled. */
+.stage-pill, .stage-pill.here, .stage-body, .stage-body.here {
+  border: 1.5px solid rgba(107,91,78,.18);
+}
+.stage-pill.open { box-shadow: none; border-color: rgba(90,107,78,.45); }

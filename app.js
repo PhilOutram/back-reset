@@ -24,9 +24,16 @@
   showView(Store.get("view", "stretch"));
 
   /* ── Modals ────────────────────────────────────────────────── */
-  function openModal(id) { $(id).classList.add("visible"); }
-  function closeModals() {
+  function hideModals() {
     document.querySelectorAll(".overlay.visible").forEach((o) => o.classList.remove("visible"));
+  }
+  function openModal(id) {
+    $(id).classList.add("visible");
+    BackNav.open("modal", hideModals);
+  }
+  function closeModals() {
+    hideModals();
+    BackNav.closed("modal");
   }
   document.querySelectorAll(".overlay").forEach((o) => {
     o.addEventListener("click", (e) => {
@@ -138,9 +145,12 @@
         `<ul>${c.notes.map((n) => `<li>${n}</li>`).join("")}</ul>`).join("") +
       "</div></div>";
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay || e.target.closest("[data-close]")) overlay.remove();
+      if (e.target !== overlay && !e.target.closest("[data-close]")) return;
+      overlay.remove();
+      BackNav.closed("changelog");
     });
     document.body.appendChild(overlay);
+    BackNav.open("changelog", () => overlay.remove());
   });
   document.body.appendChild(badge);
 

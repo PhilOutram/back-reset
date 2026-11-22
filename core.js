@@ -245,6 +245,35 @@ function daysBetween(fromKey, toKey) {
   return Math.round((parseDay(toKey) - parseDay(fromKey)) / MS_PER_DAY);
 }
 
+/* ── Back gesture ────────────────────────────────────────────
+   The app is one page, so the phone's back gesture used to leave it. Each inner screen
+   (a running routine, a dialog) now adds a history entry: back closes that screen instead.
+   open(id, onBack) when it appears; closed(id) when the app closes it with a button, which
+   drops the entry without running onBack. */
+const BackNav = (() => {
+  const stack = [];
+  let skip = 0;   // history.back() calls of our own whose popstate should be ignored
+  window.addEventListener("popstate", () => {
+    if (skip > 0) { skip--; return; }
+    const top = stack.pop();
+    if (top) top.onBack();
+  });
+  return {
+    open(id, onBack) {
+      if (stack.some((s) => s.id === id)) return;
+      stack.push({ id, onBack });
+      history.pushState({ backReset: id }, "");
+    },
+    closed(id) {
+      const i = stack.findIndex((s) => s.id === id);
+      if (i < 0) return;
+      stack.splice(i, 1);
+      skip++;
+      history.back();
+    },
+  };
+})();
+
 const History = (() => {
   let data = Store.get("history", {});
 
