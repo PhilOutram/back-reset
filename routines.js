@@ -294,7 +294,41 @@ const PHASES = [
     plan: "Keep both going and add Bending Return and Hips & Mid-Back once a day. Move " +
           "the Big 3 to 5-3-1 (Settings) once it's pain-free." },
 ];
-const phaseOfDay = (n) => (n >= PHASE_TWO_DAY ? PHASES[1] : PHASES[0]);
+const PHASE_KEYS = ["phase", "phaseChosen"];   // History fields that are not activity
+
+// Each day remembers its phase in History. A day with no record yet follows the last day
+// that has one, except that the first day from Day 10 moves to Phase 2 by itself. After
+// that, switching back to Phase 1 sticks until you move on again.
+const Phase = {
+  of(key = todayKey()) {
+    const all = History.all();
+    if (all[key]?.phase) return all[key].phase;
+    const n = Targets.dayNumber(key);
+    const last = Object.keys(all).filter((k) => k < key && all[k].phase).sort().at(-1);
+    const lastInTwo = last && Targets.dayNumber(last) >= PHASE_TWO_DAY;
+    if (last && (n < PHASE_TWO_DAY || lastInTwo)) return all[last].phase;
+    return n >= PHASE_TWO_DAY ? 2 : 1;
+  },
+  info(key = todayKey()) { return PHASES[this.of(key) - 1]; },
+  chosen(key = todayKey()) { return !!History.all()[key]?.phaseChosen; },
+  // Write today's phase down. One that was set automatically is worked out again (the day
+  // number may have changed); one you picked is kept.
+  stamp() {
+    const d = History.day();
+    if (d.phaseChosen) return;
+    const old = d.phase;
+    delete d.phase;
+    d.phase = this.of();
+    if (d.phase !== old) History.save();
+  },
+  set(n) {
+    const d = History.day();
+    d.phase = n;
+    d.phaseChosen = true;
+    History.save();
+    document.dispatchEvent(new CustomEvent("phase:changed"));
+  },
+};
 
 /* ── Routines ────────────────────────────────────────────────── */
 const ROUTINES = [

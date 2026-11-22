@@ -24,6 +24,7 @@ const Stretch = (() => {
   const els = {
     pick: $("pickScreen"), play: $("playArea"), done: $("doneScreen"),
     list: $("routineList"), begin: $("beginBtn"), plan: $("planNote"),
+    phaseChoice: $("phaseChoice"), phaseNote: $("phaseNote"),
     exCount: $("exCount"), poseImg: $("poseImg"), pose: $("pose"),
     ring: $("timerRing"), num: $("timerNum"), pill: $("phasePill"),
     name: $("exName"), side: $("exSide"), label: $("exLabel"), tip: $("exTip"),
@@ -52,18 +53,24 @@ const Stretch = (() => {
     return History.day()[id];
   }
 
-  // Which phase a routine belongs to, and how far off it is if it hasn't started yet.
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+  // Which phase a routine belongs to, and how far off it is if you're not there yet.
   function phaseTag(r) {
+    const phase2 = r.fromDay >= PHASE_TWO_DAY;
     const left = r.fromDay - Targets.dayNumber();
-    const phases = r.fromDay >= PHASE_TWO_DAY ? "Phase 2" : "Phases 1 and 2";
-    const hint = left > 0 ?
-      ` <span class="day-hint">· starts in ${left} day${left === 1 ? "" : "s"}</span>` : "";
-    return `<span class="routine-phase">From Day ${r.fromDay} · ${phases}${hint}</span>`;
+    let hint = "";
+    if (phase2 && Phase.of() === 1) {
+      hint = left > 0 ? `starts in ${plural(left, "day")}` : "when you move to Phase 2";
+      hint = ` <span class="day-hint">· ${hint}</span>`;
+    }
+    return `<span class="routine-phase">From Day ${r.fromDay} · ` +
+      `${phase2 ? "Phase 2" : "Phases 1 and 2"}${hint}</span>`;
   }
 
   // The two-phase plan above the cards, with today's phase picked out.
   function renderPlan() {
-    const now = phaseOfDay(Targets.dayNumber());
+    const now = Phase.info();
     els.plan.innerHTML = PHASES.map((p, i) => {
       const to = PHASES[i + 1] ? `-${PHASES[i + 1].fromDay - 1}` : " on";
       return `<p class="${p === now ? "now" : ""}"><b>${p.name}</b> ` +
@@ -80,11 +87,45 @@ const Stretch = (() => {
     return n ? `<span class="done-badge">${n}× today</span>` : "";
   }
 
+  /* ── Phase switch (bottom of the picker) ───────────────────── */
+  const READY_FOR_TWO = "Phase 2 is for once the spasms have stopped, everyday moves " +
+    "(getting up, walking, socks on) are mostly comfortable and pain is mostly 3/10 or less.";
+
+  function renderPhaseSwitch() {
+    const n = Targets.dayNumber();
+    const p = Phase.of();
+    els.phaseChoice.querySelectorAll("button").forEach((b) => {
+      b.classList.toggle("active", Number(b.dataset.phase) === p);
+    });
+    let lead;
+    if (p === 2 && !Phase.chosen() && n >= PHASE_TWO_DAY) {
+      lead = `Moved to Phase 2 automatically at Day ${PHASE_TWO_DAY}.`;
+    } else if (p === 2) {
+      lead = n < PHASE_TWO_DAY ? "You've moved on early." : "You're in Phase 2.";
+    } else if (n < PHASE_TWO_DAY) {
+      lead = `Moves to Phase 2 by itself on Day ${PHASE_TWO_DAY}, in ` +
+        `${plural(PHASE_TWO_DAY - n, "day")}.`;
+    } else {
+      lead = "You're staying in Phase 1 for now.";
+    }
+    const tail = p === 2 ?
+      "Not there yet? Switch back to Phase 1 - it stays there until you move on." :
+      "Switch to Phase 2 whenever you're ready.";
+    els.phaseNote.textContent = `${lead} ${READY_FOR_TWO} ${tail} Each day remembers its ` +
+      "phase, and the daily targets follow it.";
+  }
+
+  els.phaseChoice.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-phase]");
+    if (b) Phase.set(Number(b.dataset.phase));
+  });
+
   /* ── Routine picker ────────────────────────────────────────── */
   function renderPicker() {
     renderPlan();
+    renderPhaseSwitch();
     const today = History.day();
-    const targets = Targets.get();
+    const targets = Targets.get(Phase.of());
     const opts = Store.get("big3", {});
     els.list.innerHTML = ROUTINES.map((r) => {
       const mins = Math.round(buildRoutine(r.id, opts).total / 60);
@@ -337,7 +378,7 @@ const Stretch = (() => {
     plan = null;
     els.doneText.textContent = `${name} complete. Getting up: brace lightly, roll onto ` +
       "your side as one piece, push up to hands and knees, then half-kneel and stand.";
-    const target = Targets.get()[id] || 0;
+    const target = Targets.get(Phase.of())[id] || 0;
     const day = `Day ${Targets.dayNumber()}`;
     els.doneCount.textContent = target > 0 ?
       `${day}: ${n} of ${target}${n >= target ? " - target met" : ""}.` :
@@ -378,6 +419,7 @@ const Stretch = (() => {
   });
 
   document.addEventListener("day:changed", renderPicker);
+  document.addEventListener("phase:changed", renderPicker);
   renderPicker();
   renderVoice();
   preload();

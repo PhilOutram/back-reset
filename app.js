@@ -54,6 +54,7 @@
   // Everything that shows a day number repaints when it changes.
   function dayChanged() {
     renderDay();
+    Phase.stamp();
     document.dispatchEvent(new CustomEvent("day:changed"));
   }
 
@@ -85,13 +86,14 @@
     if (todayKey() !== shownDay) { shownDay = todayKey(); dayChanged(); }
   }, 60 * MS_PER_SEC);
   renderDay();
+  Phase.stamp();
 
   /* ── Big 3 options ─────────────────────────────────────────── */
   function big3Opts() { return { ...DEFAULT_OPTIONS, ...Store.get("big3", {}) }; }
 
   function renderBig3() {
     const opts = big3Opts();
-    document.querySelectorAll(".choice-group").forEach((g) => {
+    document.querySelectorAll(".choice-group[data-opt]").forEach((g) => {
       const current = g.dataset.store ? Store.get(g.dataset.store, "quiet") : opts[g.dataset.opt];
       g.querySelectorAll("button").forEach((b) => {
         b.classList.toggle("active", String(current) === b.dataset.val);
@@ -101,7 +103,7 @@
     $("big3Summary").textContent = `About ${mins} minutes with these settings.`;
   }
 
-  document.querySelectorAll(".choice-group").forEach((g) => {
+  document.querySelectorAll(".choice-group[data-opt]").forEach((g) => {
     g.addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b) return;

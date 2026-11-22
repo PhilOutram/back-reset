@@ -422,7 +422,7 @@ const Pain = (() => {
     const list = sorted();
     const days = new Set(list.map((e) => dayKeyOf(new Date(e.t))));
     Object.entries(History.all()).forEach(([k, v]) => {
-      if (Object.keys(v).length) days.add(k);
+      if (Object.keys(v).some((f) => !PHASE_KEYS.includes(f))) days.add(k);
     });
     const now = Date.now();
     const lines = [
@@ -434,7 +434,7 @@ const Pain = (() => {
       "",
     ];
     [...days].sort().forEach((key) => {
-      lines.push(Targets.label(key, DAY_HEAD));
+      lines.push(`${Targets.label(key, DAY_HEAD)} · Phase ${Phase.of(key)}`);
       const act = activityLine(key);
       if (act) lines.push(`  Activity: ${act}`);
       list.filter((e) => dayKeyOf(new Date(e.t)) === key).forEach((e) => {

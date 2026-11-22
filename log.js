@@ -62,7 +62,7 @@ const Log = (() => {
       { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
     const today = History.day();
-    const targets = Targets.get();
+    const targets = Targets.get(Phase.of());
     const chips = COLS.filter((c) => targets[c.id] > 0 || today[c.id]).map((c) => {
       const got = today[c.id] || 0;
       const want = targets[c.id];
@@ -80,7 +80,6 @@ const Log = (() => {
   }
 
   function renderTable() {
-    const targets = Targets.get();
     const all = History.all();
     const head = '<thead><tr><th>Day</th><th>Date</th>' +
       COLS.map((c) => `<th>${c.head}</th>`).join("") + "<th>Pain</th><th>Desk</th></tr></thead>";
@@ -90,7 +89,8 @@ const Log = (() => {
       const n = daysBetween(Targets.dayOne(), key) + 1;
       const isToday = key === todayKey() ? ' class="today-row"' : "";
       // A heading row at the top of each phase's block of days (newest first).
-      const phase = n > 0 ? phaseOfDay(n) : null;
+      const phase = n > 0 ? Phase.info(key) : null;
+      const targets = Targets.get(phase ? phase.n : 1);
       const phaseRow = phase && phase !== lastPhase ?
         `<tr class="phase-row"><td colspan="${TABLE_COLS}">${phase.name}</td></tr>` : "";
       lastPhase = phase;
@@ -102,19 +102,23 @@ const Log = (() => {
     els.table.innerHTML = head + `<tbody>${rows.join("")}</tbody>`;
   }
 
+  // A set of targets for each phase; each day in the table is judged by its own phase.
   function renderSettings() {
-    const targets = Targets.get();
-    els.steppers.innerHTML = COLS.map((c) => {
-      const name = ROUTINES.find((r) => r.id === c.id).name;
-      return `
-        <div class="stepper" data-id="${c.id}">
-          <span class="stepper-name">${name}</span>
-          <button data-step="-1" aria-label="Fewer ${name}">−</button>
-          <span class="stepper-val">${targets[c.id]}<small>/day</small></span>
-          <button data-step="1" aria-label="More ${name}">+</button>
-        </div>`;
+    els.steppers.innerHTML = PHASES.map((p) => {
+      const targets = Targets.get(p.n);
+      return `<p class="target-phase">${p.name}</p>` + COLS.map((c) => {
+        const name = ROUTINES.find((r) => r.id === c.id).name;
+        return `
+          <div class="stepper" data-id="${c.id}" data-phase="${p.n}">
+            <span class="stepper-name">${name}</span>
+            <button data-step="-1" aria-label="Fewer ${name}">−</button>
+            <span class="stepper-val">${targets[c.id]}<small>/day</small></span>
+            <button data-step="1" aria-label="More ${name}">+</button>
+          </div>`;
+      }).join("");
     }).join("");
-    els.summary.textContent = COLS.map((c) => targets[c.id]).join(" / ");
+    const t = Targets.get(Phase.of());
+    els.summary.textContent = `Phase ${Phase.of()}: ` + COLS.map((c) => t[c.id]).join(" / ");
   }
 
   function render() {
@@ -125,16 +129,17 @@ const Log = (() => {
   els.steppers.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-step]");
     if (!btn) return;
-    const id = btn.closest(".stepper").dataset.id;
-    const t = Targets.get();
+    const { id, phase } = btn.closest(".stepper").dataset;
+    const t = Targets.get(Number(phase));
     t[id] = Math.min(MAX_TARGET, Math.max(0, t[id] + Number(btn.dataset.step)));
-    Targets.set(t);
+    Targets.set(t, Number(phase));
     renderSettings();
     render();
     Stretch.renderPicker();
   });
 
   document.addEventListener("day:changed", render);
+  document.addEventListener("phase:changed", () => { renderSettings(); render(); });
 
   // Desk minutes tick up constantly, so only repaint while the tab is on screen.
   document.addEventListener("history:changed", () => {

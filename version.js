@@ -1,10 +1,20 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.11";
+const VERSION = "v0.12";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.12",
+    date: "2026-11-22",
+    notes: [
+      "Today's phase switch at the bottom of the Stretches tab: it moves to Phase 2 by " +
+        "itself on Day 10, says what Phase 2 depends on, and can be switched back.",
+      "Each day remembers its phase, and daily targets are set per phase - Phase 2 adds " +
+        "Bending Return and Hips & Mid-Back once a day.",
+    ],
+  },
   {
     version: "v0.11",
     date: "2026-11-22",

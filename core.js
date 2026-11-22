@@ -226,7 +226,11 @@ const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
    seconds (stand / sit / move). Kept in memory and written back on save(). */
 const HISTORY_KEEP_DAYS = 400;
 const MS_PER_DAY        = 24 * 60 * 60 * MS_PER_SEC;
-const DEFAULT_TARGETS   = { release: 2, big3: 1, flexion: 0, mobility: 0 };
+// Daily targets for each phase (see PHASES in routines.js).
+const DEFAULT_TARGETS   = {
+  1: { release: 2, big3: 1, flexion: 0, mobility: 0 },
+  2: { release: 2, big3: 1, flexion: 1, mobility: 1 },
+};
 const DEFAULT_DAY_ONE   = "2026-11-15";   // the day the back first locked up
 
 function parseDay(key) {
@@ -265,8 +269,11 @@ const History = (() => {
 })();
 
 const Targets = {
-  get() { return { ...DEFAULT_TARGETS, ...Store.get("targets", {}) }; },
-  set(t) { Store.set("targets", t); },
+  // One set of daily targets per phase. Before v0.12 there was a single set, which
+  // becomes Phase 1's.
+  byPhase() { return Store.get("targetsByPhase", null) || { 1: Store.get("targets", {}) }; },
+  get(phase = 1) { return { ...DEFAULT_TARGETS[phase], ...(this.byPhase()[phase] || {}) }; },
+  set(t, phase = 1) { Store.set("targetsByPhase", { ...this.byPhase(), [phase]: t }); },
   dayOne() { return Store.get("dayOne", DEFAULT_DAY_ONE); },
   setDayOne(key) { Store.set("dayOne", key); },
   dayNumber(key = todayKey()) { return daysBetween(this.dayOne(), key) + 1; },

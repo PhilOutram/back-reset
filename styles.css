@@ -900,3 +900,24 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
   color: var(--moss);
   background-color: transparent;
 }
+
+/* ── Phase switch and per-phase targets ─────────────────────── */
+.phase-switch {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.phase-switch .choice-label { text-align: left; }
+.phase-switch .fine { max-width: none; text-align: left; line-height: 1.5; }
+.target-phase {
+  margin: 10px 0 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--moss);
+}

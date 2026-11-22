@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.11">
+  <meta name="app-version" content="v0.12">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.11">
+  <link rel="stylesheet" href="styles.css?v=0.12">
 </head>
 <body>
 <div class="app">
@@ -52,6 +52,14 @@
         <div class="routine-list" id="routineList"></div>
         <button class="btn btn-main" id="beginBtn">Begin</button>
         <p class="fine">Keeps the screen on while you stretch.</p>
+        <div class="phase-switch">
+          <span class="choice-label">Today's phase</span>
+          <div class="choice-group" id="phaseChoice">
+            <button data-phase="1">Phase 1 <small>Calm it down</small></button>
+            <button data-phase="2">Phase 2 <small>Rebuild</small></button>
+          </div>
+          <p class="fine" id="phaseNote"></p>
+        </div>
       </div>
 
       <!-- Playing -->
@@ -258,8 +266,9 @@
         <ul>
           <li><strong>Phase 1 · Calm it down (Day 1-9)</strong> - Back Release twice a day and the McGill Big 3 once a day.</li>
           <li><strong>Phase 2 · Rebuild (Day 10 on)</strong> - keep both going and add Bending Return and Hips &amp; Mid-Back once a day.</li>
-          <li>Nothing changes by itself on Day 10: the Stretches tab shows which phase you're in, and you choose what to do. Move the Big 3 from 3-2-1 to 5-3-1 in Settings once it's pain-free - that goes by how it feels, not by the day.</li>
-          <li>Daily targets (Log tab) are one set for every day. Raise the Bending Return and Hips &amp; Mid-Back targets when you start Phase 2.</li>
+          <li>The <strong>Today's phase</strong> switch at the bottom of the Stretches tab moves to Phase 2 by itself on Day 10. It depends on how your back is, not the date: Phase 2 is for once the spasms have stopped, everyday moves are mostly comfortable and pain is mostly 3/10 or less. Not there yet? Switch back to Phase 1 and it stays there until you move on.</li>
+          <li>Each day remembers its phase. Daily targets are set per phase (Log tab), and each day in the Log is checked against its own phase's targets.</li>
+          <li>Move the Big 3 from 3-2-1 to 5-3-1 in Settings once it's pain-free - that also goes by how it feels, not by the day.</li>
         </ul>
         <h3>Stretches</h3>
         <ul>
@@ -347,7 +356,7 @@
 
 </div>
 
-<script src="version.js?v=0.11"></script>
+<script src="version.js?v=0.12"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -362,12 +371,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.11"></script>
-<script src="routines.js?v=0.11"></script>
-<script src="stretch.js?v=0.11"></script>
-<script src="desk.js?v=0.11"></script>
-<script src="pain.js?v=0.11"></script>
-<script src="log.js?v=0.11"></script>
-<script src="app.js?v=0.11"></script>
+<script src="core.js?v=0.12"></script>
+<script src="routines.js?v=0.12"></script>
+<script src="stretch.js?v=0.12"></script>
+<script src="desk.js?v=0.12"></script>
+<script src="pain.js?v=0.12"></script>
+<script src="log.js?v=0.12"></script>
+<script src="app.js?v=0.12"></script>
 </body>
 </html>
