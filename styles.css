@@ -921,3 +921,44 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
   text-transform: uppercase;
   color: var(--moss);
 }
+
+/* ── Tighter routine cards and a collapsed plan (v0.13) ─────── */
+.pick { gap: 10px; }
+.routine-list { gap: 8px; }
+.routine { gap: 2px; padding: 9px 12px; }
+.routine-name { font-size: 16px; line-height: 1.25; }
+.routine-when { font-size: 10.5px; }
+.routine-blurb { font-size: 12px; line-height: 1.4; }
+.routine-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 3px;
+}
+.routine-foot .done-badge { margin-top: 0; }
+.routine-foot .routine-phase { flex: 1; text-align: center; font-size: 10px; }
+
+.plan-note { display: block; margin-bottom: 0; width: 100%; }
+.plan-note summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background-color: rgba(90,107,78,.1);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dark);
+  text-align: left;
+}
+.plan-note summary::-webkit-details-marker { display: none; }
+.plan-note summary::after { content: '▾'; color: var(--text-light); margin-left: 8px; }
+.plan-note[open] summary::after { content: '▴'; }
+#planBody { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.plan-note p.plan-more { padding: 0 10px; color: var(--text-light); }
+#stretchView .card { padding: 12px 12px 14px; }
+.pick { gap: 8px; }
+#beginBtn { padding-top: 11px; padding-bottom: 11px; }

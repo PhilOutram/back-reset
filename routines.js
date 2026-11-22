@@ -202,10 +202,20 @@ const PYRAMIDS = {
 };
 
 const DEFAULT_OPTIONS = {
-  pyramid: "3-2-1",
+  pyramid1: "3-2-1",   // Big 3 pyramid in Phase 1 ...
+  pyramid2: "5-3-1",   // ... and in Phase 2. Both can be changed in Settings.
   holdSecs: 8,
   restSecs: 20,
 };
+
+// The Big 3 options for a phase: the pyramid steps up with the phase. Before v0.13 there
+// was a single pyramid setting, which becomes Phase 1's.
+function big3Options(phase = Phase.of()) {
+  const stored = Store.get("big3", {});
+  const legacy = stored.pyramid ? { pyramid1: stored.pyramid } : {};
+  const opts = { ...DEFAULT_OPTIONS, ...legacy, ...stored };
+  return { ...opts, pyramid: opts[`pyramid${phase}`] };
+}
 
 /* ── Segment helpers ─────────────────────────────────────────── */
 function seg(ex, kind, secs, extra = {}) {
@@ -291,8 +301,8 @@ const PHASES = [
   { n: 1, fromDay: 1, name: "Phase 1 · Calm it down",
     plan: "Back Release twice a day and the Big 3 once a day." },
   { n: 2, fromDay: PHASE_TWO_DAY, name: "Phase 2 · Rebuild",
-    plan: "Keep both going and add Bending Return and Hips & Mid-Back once a day. Move " +
-          "the Big 3 to 5-3-1 (Settings) once it's pain-free." },
+    plan: "Keep both going, add Bending Return and Hips & Mid-Back once a day, and the " +
+          "Big 3 steps up to a 5-3-1 pyramid." },
 ];
 const PHASE_KEYS = ["phase", "phaseChosen"];   // History fields that are not activity
 
@@ -338,8 +348,8 @@ const ROUTINES = [
     short: "Release",
     fromDay: 1,
     when: "Twice a day, once warmed up, and once before bed",
-    blurb: "Standing extensions, mid-range cat-cow, Sphinx, hip rotation each side, glute " +
-           "bridges, then 2 minutes of legs-up rest. Always moving downwards.",
+    blurb: "Extensions, cat-cow, Sphinx, hip rotation, glute bridges, then a legs-up " +
+           "rest.",
     // Ordered standing -> hands and knees -> front -> back, so every change of position
     // is downhill and nothing asks a relaxed back to push you back up off the floor.
     build: () => [
@@ -365,9 +375,10 @@ const ROUTINES = [
     name: "McGill Big 3",
     short: "Big 3",
     fromDay: 1,
-    when: "Once a day, mid-day, not in the first hour after waking. 3-2-1 holds; 5-3-1 " +
-          "once pain-free",
-    blurb: "Short braced holds in a pyramid. Breathe behind the brace, stop if it pinches.",
+    when: "Once a day, mid-day, not in the first hour after waking",
+    // Says which pyramid today's phase uses.
+    blurb: (o) => `Short braced holds in a ${o.pyramid} pyramid. Breathe behind the brace; ` +
+      "stop if it pinches.",
     build: (opts) => [
       ...pyramid("curlUp", opts, MOVE_SECS, "Get down the easy way and lie on your back."),
       ...pyramid("sidePlank", opts, LEAD_IN + 6,
@@ -381,8 +392,8 @@ const ROUTINES = [
     short: "Bending",
     fromDay: PHASE_TWO_DAY,
     when: "Once a day · stop at mild discomfort",
-    blurb: "Gently brings forward bending back: full cat-cow, knee hugs and slow roll-downs, " +
-           "finishing with extensions.",
+    blurb: "Brings bending back gently: full cat-cow, knee hugs, slow roll-downs, then " +
+           "extensions.",
     build: () => [
       ...timed("catCowFull", 64, MOVE_SECS, {
         how: "Get down the easy way: half kneel, lower the other knee, hands down.",
@@ -403,8 +414,8 @@ const ROUTINES = [
     short: "Hips",
     fromDay: PHASE_TWO_DAY,
     when: "Once a day, once the stiffness has eased",
-    blurb: "Hip switches, open book, dowel hinge, Pallof press, split squats and a wall sit. " +
-           "Needs a stick and a band.",
+    blurb: "Hip switches, open book, hinge, Pallof press, split squats, wall sit. Needs a " +
+           "stick and a band.",
     build: () => [
       ...timed("hipSwitch", 64, MOVE_SECS, {
         how: "Sit on the floor, knees bent, hands on the floor behind you.",

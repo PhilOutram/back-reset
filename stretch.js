@@ -23,7 +23,8 @@ const Stretch = (() => {
   const $ = (id) => document.getElementById(id);
   const els = {
     pick: $("pickScreen"), play: $("playArea"), done: $("doneScreen"),
-    list: $("routineList"), begin: $("beginBtn"), plan: $("planNote"),
+    list: $("routineList"), begin: $("beginBtn"),
+    planNow: $("planNow"), planBody: $("planBody"),
     phaseChoice: $("phaseChoice"), phaseNote: $("phaseNote"),
     exCount: $("exCount"), poseImg: $("poseImg"), pose: $("pose"),
     ring: $("timerRing"), num: $("timerNum"), pill: $("phasePill"),
@@ -61,22 +62,22 @@ const Stretch = (() => {
     const left = r.fromDay - Targets.dayNumber();
     let hint = "";
     if (phase2 && Phase.of() === 1) {
-      hint = left > 0 ? `starts in ${plural(left, "day")}` : "when you move to Phase 2";
+      hint = left > 0 ? `in ${plural(left, "day")}` : "when you move on";
       hint = ` <span class="day-hint">· ${hint}</span>`;
     }
     return `<span class="routine-phase">From Day ${r.fromDay} · ` +
       `${phase2 ? "Phase 2" : "Phases 1 and 2"}${hint}</span>`;
   }
 
-  // The two-phase plan above the cards, with today's phase picked out.
+  // The two-phase plan above the cards, collapsed to one line naming today's phase.
   function renderPlan() {
     const now = Phase.info();
-    els.plan.innerHTML = PHASES.map((p, i) => {
+    els.planNow.textContent = `${now.name} · you are here`;
+    els.planBody.innerHTML = PHASES.map((p, i) => {
       const to = PHASES[i + 1] ? `-${PHASES[i + 1].fromDay - 1}` : " on";
       return `<p class="${p === now ? "now" : ""}"><b>${p.name}</b> ` +
-        `<span>Day ${p.fromDay}${to}${p === now ? " · you are here" : ""}</span><br>` +
-        `${p.plan}</p>`;
-    }).join("");
+        `<span>Day ${p.fromDay}${to}</span><br>${p.plan}</p>`;
+    }).join("") + '<p class="plan-more">Switch phase at the bottom of this page.</p>';
   }
 
   function badgeFor(n, target) {
@@ -126,18 +127,18 @@ const Stretch = (() => {
     renderPhaseSwitch();
     const today = History.day();
     const targets = Targets.get(Phase.of());
-    const opts = Store.get("big3", {});
+    const opts = big3Options();
     els.list.innerHTML = ROUTINES.map((r) => {
       const mins = Math.round(buildRoutine(r.id, opts).total / 60);
-      const badge = badgeFor(today[r.id] || 0, targets[r.id] || 0);
+      const badge = badgeFor(today[r.id] || 0, targets[r.id] || 0) || "<span></span>";
+      const blurb = typeof r.blurb === "function" ? r.blurb(opts) : r.blurb;
       return `
         <button class="routine ${r.id === selected ? "selected" : ""}" data-id="${r.id}">
-          <span class="routine-head"><span class="routine-name">${r.name}</span>
-            <span class="routine-mins">${mins} min</span></span>
-          ${phaseTag(r)}
+          <span class="routine-name">${r.name}</span>
           <span class="routine-when">${r.when}</span>
-          <span class="routine-blurb">${r.blurb}</span>
-          ${badge}
+          <span class="routine-blurb">${blurb}</span>
+          <span class="routine-foot">${badge}${phaseTag(r)}
+            <span class="routine-mins">${mins} min</span></span>
         </button>`;
     }).join("");
   }
@@ -313,7 +314,7 @@ const Stretch = (() => {
 
   function start() {
     Sound.get();   // unlock audio inside the tap
-    plan = buildRoutine(selected, Store.get("big3", {}));
+    plan = buildRoutine(selected, big3Options());
     paused = false;
     els.pause.textContent = "Pause";
     els.pick.classList.remove("visible");

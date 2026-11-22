@@ -1,10 +1,20 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.12";
+const VERSION = "v0.13";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.13",
+    date: "2026-11-22",
+    notes: [
+      "The Big 3 pyramid follows the phase: 3-2-1 in Phase 1, 5-3-1 in Phase 2. Each can " +
+        "be changed in Settings.",
+      "Tighter routine cards and a collapsed plan, so all four routines and Begin fit on a " +
+        "phone screen.",
+    ],
+  },
   {
     version: "v0.12",
     date: "2026-11-22",

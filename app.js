@@ -89,7 +89,7 @@
   Phase.stamp();
 
   /* ── Big 3 options ─────────────────────────────────────────── */
-  function big3Opts() { return { ...DEFAULT_OPTIONS, ...Store.get("big3", {}) }; }
+  const big3Opts = () => big3Options();
 
   function renderBig3() {
     const opts = big3Opts();
@@ -100,7 +100,8 @@
       });
     });
     const mins = Math.round(buildRoutine("big3", opts).total / 60);
-    $("big3Summary").textContent = `About ${mins} minutes with these settings.`;
+    $("big3Summary").textContent = `Today (Phase ${Phase.of()}): ${opts.pyramid}, about ` +
+      `${mins} minutes.`;
   }
 
   document.querySelectorAll(".choice-group[data-opt]").forEach((g) => {
@@ -114,7 +115,7 @@
       }
       const opts = Store.get("big3", {});
       const key = g.dataset.opt;
-      opts[key] = key === "pyramid" ? b.dataset.val : Number(b.dataset.val);
+      opts[key] = key.startsWith("pyramid") ? b.dataset.val : Number(b.dataset.val);
       Store.set("big3", opts);
       renderBig3();
       Stretch.renderPicker();

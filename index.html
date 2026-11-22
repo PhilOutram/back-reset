@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.12">
+  <meta name="app-version" content="v0.13">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.12">
+  <link rel="stylesheet" href="styles.css?v=0.13">
 </head>
 <body>
 <div class="app">
@@ -48,7 +48,10 @@
 
       <!-- Pick a routine -->
       <div class="screen pick visible" id="pickScreen">
-        <div class="plan-note" id="planNote"></div>
+        <details class="plan-note" id="planNote">
+          <summary><span id="planNow"></span></summary>
+          <div id="planBody"></div>
+        </details>
         <div class="routine-list" id="routineList"></div>
         <button class="btn btn-main" id="beginBtn">Begin</button>
         <p class="fine">Keeps the screen on while you stretch.</p>
@@ -265,15 +268,15 @@
         <h3>The plan</h3>
         <ul>
           <li><strong>Phase 1 · Calm it down (Day 1-9)</strong> - Back Release twice a day and the McGill Big 3 once a day.</li>
-          <li><strong>Phase 2 · Rebuild (Day 10 on)</strong> - keep both going and add Bending Return and Hips &amp; Mid-Back once a day.</li>
+          <li><strong>Phase 2 · Rebuild (Day 10 on)</strong> - keep both going, add Bending Return and Hips &amp; Mid-Back once a day, and the Big 3 steps up to 5-3-1.</li>
           <li>The <strong>Today's phase</strong> switch at the bottom of the Stretches tab moves to Phase 2 by itself on Day 10. It depends on how your back is, not the date: Phase 2 is for once the spasms have stopped, everyday moves are mostly comfortable and pain is mostly 3/10 or less. Not there yet? Switch back to Phase 1 and it stays there until you move on.</li>
           <li>Each day remembers its phase. Daily targets are set per phase (Log tab), and each day in the Log is checked against its own phase's targets.</li>
-          <li>Move the Big 3 from 3-2-1 to 5-3-1 in Settings once it's pain-free - that also goes by how it feels, not by the day.</li>
+          <li>Phase 2 doesn't mean pain-free - that can take weeks longer. The Big 3 pyramid follows the phase (3-2-1, then 5-3-1); change either in Settings.</li>
         </ul>
         <h3>Stretches</h3>
         <ul>
           <li><strong>Back Release</strong> - extensions, Sphinx, cat-cow, hip rotation, glute bridges and a short legs-up rest. Twice a day once you're warmed up, in both phases.</li>
-          <li><strong>McGill Big 3</strong> - short braced holds in a 3-2-1 pyramid, once a day mid-day. Switch to 5-3-1 in Settings once it's pain-free.</li>
+          <li><strong>McGill Big 3</strong> - short braced holds, once a day mid-day: a 3-2-1 pyramid in Phase 1 and 5-3-1 in Phase 2.</li>
           <li>Curl-ups and bird-dogs alternate sides on every hold (right, left, right, left...), so each side rests while the other works. Side planks stay in blocks - all the left holds, then all the right - so you only roll over once per set.</li>
           <li>Rests shrink as the sets get smaller: 20 s after the first set, 15 s after the second.</li>
           <li><strong>Bending Return</strong> - Phase 2, from Day 10. Gently brings forward bending back so a low hockey crouch stops feeling risky. Stop at mild discomfort.</li>
@@ -333,11 +336,16 @@
           <button data-val="pips">Pips only <small>no words</small></button>
         </div>
         <h3>McGill Big 3</h3>
-        <p>Applies the next time you begin the Big 3.</p>
-        <div class="choice-group" data-opt="pyramid">
-          <span class="choice-label">Pyramid</span>
-          <button data-val="3-2-1">3-2-1 <small>while sensitive</small></button>
-          <button data-val="5-3-1">5-3-1 <small>once pain-free</small></button>
+        <p>The pyramid steps up with the phase: 3-2-1 in Phase 1, 5-3-1 in Phase 2. If 5-3-1 is too much when you move on, set Phase 2 back to 3-2-1 here. Applies the next time you begin the Big 3.</p>
+        <div class="choice-group" data-opt="pyramid1">
+          <span class="choice-label">Pyramid in Phase 1 · Calm it down</span>
+          <button data-val="3-2-1">3-2-1</button>
+          <button data-val="5-3-1">5-3-1</button>
+        </div>
+        <div class="choice-group" data-opt="pyramid2">
+          <span class="choice-label">Pyramid in Phase 2 · Rebuild</span>
+          <button data-val="3-2-1">3-2-1</button>
+          <button data-val="5-3-1">5-3-1</button>
         </div>
         <div class="choice-group" data-opt="holdSecs">
           <span class="choice-label">Hold</span>
@@ -356,7 +364,7 @@
 
 </div>
 
-<script src="version.js?v=0.12"></script>
+<script src="version.js?v=0.13"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -371,12 +379,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.12"></script>
-<script src="routines.js?v=0.12"></script>
-<script src="stretch.js?v=0.12"></script>
-<script src="desk.js?v=0.12"></script>
-<script src="pain.js?v=0.12"></script>
-<script src="log.js?v=0.12"></script>
-<script src="app.js?v=0.12"></script>
+<script src="core.js?v=0.13"></script>
+<script src="routines.js?v=0.13"></script>
+<script src="stretch.js?v=0.13"></script>
+<script src="desk.js?v=0.13"></script>
+<script src="pain.js?v=0.13"></script>
+<script src="log.js?v=0.13"></script>
+<script src="app.js?v=0.13"></script>
 </body>
 </html>
