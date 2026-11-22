@@ -1,10 +1,20 @@
 // Back Reset - version and changelog.
 // Bump VERSION and prepend an entry on EVERY publish, and change the ?v= stamps in
 // index.html and the CACHE name in sw.js to match. Dates are YYYY-MM-DD.
-const VERSION = "v0.07";
+const VERSION = "v0.08";
 
 // Newest first.
 const CHANGELOG = [
+  {
+    version: "v0.08",
+    date: "2026-11-22",
+    notes: [
+      "Pain map is now just the back, from chest to knees, so you can place a spot more " +
+        "precisely - with the spine levels, SI joints and hip bones marked.",
+      "Tapping shows the spot and its name for a second before the form opens, and the " +
+        "form shows a thumbnail of where you tapped. Wrong spot? Close it and tap again.",
+    ],
+  },
   {
     version: "v0.07",
     date: "2026-11-22",

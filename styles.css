@@ -832,3 +832,26 @@ header p { font-size: 11px; color: var(--text-light); letter-spacing: .03em; }
 #dayResetBtn { align-self: center; margin-top: 6px; font-size: 13px; }
 .day-hint { color: var(--amber); }
 #painWhenDay { font-weight: 500; color: var(--moss); }
+
+/* ── Pain map: back only, tap preview ───────────────────────── */
+.body-map { max-width: 300px; max-height: 58dvh; }
+.body-map .body { stroke: none; }
+.body-map .outline, .body-map .bones, .body-map .side-label { pointer-events: none; }
+.body-map .outline { stroke: var(--bark-light); }
+.body-map .bones { fill: #DCCBB8; }
+.body-map .side-label { fill: var(--text-light); }
+.body-map .pending { pointer-events: none; }
+.pending-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pending-pulse 0.9s ease-out infinite;
+}
+@keyframes pending-pulse {
+  from { transform: scale(0.7); opacity: 1; }
+  to   { transform: scale(1.7); opacity: 0.2; }
+}
+.pain-hint.picked { color: var(--amber); font-weight: 500; font-size: 13px; }
+.pain-where-row { display: flex; gap: 12px; align-items: center; }
+.pain-where-row .field { flex: 1; min-width: 0; }
+.pain-mini { flex: 0 0 auto; width: 64px; height: 96px; }
+.pain-mini[hidden] { display: none; }
