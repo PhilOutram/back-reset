@@ -23,6 +23,10 @@ Served on GitHub Pages at https://philoutram.github.io/back-reset/.
 - `desk.js` - the rotation. State is saved, so a reload carries on (and shows a "tap to
   switch the beeps back on" banner, because audio needs a gesture).
 - `poses/*.webp` - illustrations generated in the Gemini chat.
+- `pain.js` - the Pain tab. The map is `poses/back-map.webp` (848x1264, transparent
+  background) shown at 200 units wide; `SIDE`/`INNER` (outline), `Y`/`X` (region
+  boundaries) and `LABELS` were measured from that picture, so a new picture means
+  re-measuring them and adding a migration step (`MAP_VERSION`) for saved spots.
 
 ## Why the desk timer works with the screen off (do not undo)
 

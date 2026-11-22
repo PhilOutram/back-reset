@@ -6,23 +6,23 @@
    ============================================================ */
 
 const Pain = (() => {
-  const VIEW_W        = 200;   // the back seen from behind, nipple line to just below the knees
-  const VIEW_H        = 300;
+  const VIEW_W        = 200;   // the back seen from behind, lowest ribs to just below the knees
+  const VIEW_H        = 290;   // the body ends at about 285
   const MID_X         = VIEW_W / 2;
-  const LABEL_INSET   = 12;    // LEFT / RIGHT labels above the map
-  const LABEL_Y       = -6;
-  const TOP_PAD       = 14;
-  const MAP_VERSION   = 2;     // v0.08 back-only map; earlier entries used a front+back figure
+  const IMG_SRC       = "poses/back-map.webp";
+  const IMG_H         = 298.1; // the 848 x 1264 illustration scaled to VIEW_W
+  const LABEL_INSET   = 4;     // LEFT / RIGHT in the empty top corners
+  const LABEL_Y       = 7;
+  const MAP_VERSION   = 3;     // v0.16 illustrated map; v0.08-v0.15 used a drawn outline
   const PREVIEW_MS    = 1000;  // the tapped spot shows this long before the form opens
   const LIVE_DAYS     = 7;     // markers and list rows shown on the tab
-  const EXPORT_SCALE  = 3;
+  const EXPORT_SCALE  = 4;     // matches the illustration's own resolution
   const MAX_LEVEL     = 10;
   const MARK_R        = 4.4;
   const MARK_R_LAST   = 6;
   const MARK_R_EXPORT = 5;
   const MARK_R_MINI   = 14;
-  const SPINE_HALF    = 6;     // half-width of the "on the spine" strip
-  const OUTER_THIGH   = 0.72;  // fraction of the way across a leg that counts as the outer side
+  const OUTER_THIGH   = 0.75;  // fraction of the way across a leg that counts as the outer side
   const DAY_HEAD      = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
   const MS_PER_MIN    = 60 * MS_PER_SEC;
   const KINDS = ["Ache", "Stiff", "Sharp", "Spasm / catch", "Tingling / numb", "Burning",
@@ -30,81 +30,74 @@ const Pain = (() => {
   const NERVE_KINDS = ["Tingling / numb", "Shooting"];
   const COLOURS = { low: "#6E8B5A", mid: "#C8894A", high: "#B4533A" };
 
-  /* ── The back: landmarks, outline and detail ───────────────── */
-  // Heights on the map: 0 is the nipple line, VIEW_H just below the knee creases.
+  /* ── The back: landmarks measured from the illustration ────── */
+  // Heights on the map (0 = top of the picture).
   const Y = {
-    SCAPULA: 14, RIBS: 56, CREST: 98, PELVIS: 110, SACRUM: 140, SIT_BONE: 158, FOLD: 172,
-    CROTCH: 178, THIGH_MID: 228, KNEE: 276,
+    RIBS: 38.9, CREST: 84, PELVIS: 96, GLUTE_MED: 125, SACRUM: 127, SIT_BONE: 140,
+    CROTCH: 147.4, FOLD: 158, THIGH_MID: 200, KNEE: 236,
   };
   // Widths: distance from the spine where one region gives way to the next.
   const X = {
-    NEAR_SPINE: 20, SI: 22, SIT_BONE: 28, QL: 42, MID_BACK: 46, BUTTOCK: 50, TROCHANTER: 52,
-    SCAPULA_INNER: 28,
+    SPINE: 8, SI: 20, GLUTE_MED: 24, SIT_BONE: 24, ERECTOR: 29, TROCHANTER: 49,
   };
-  const VERTEBRAE = [["T7", 6], ["T8", 15], ["T9", 24], ["T10", 33], ["T11", 42], ["T12", 51],
-    ["L1", 62], ["L2", 73], ["L3", 84], ["L4", 95], ["L5", 106]];
-  // Body edges as [distance from the spine, height], top to bottom.
-  const SIDE = [[64, 0], [63, 30], [57, 58], [50, 82], [52, 95], [58, 108], [64, 128],
-    [65, 150], [64, 170], [60, 200], [55, 235], [49, 270], [46, 300]];
-  const INNER = [[2, Y.CROTCH], [4, 190], [6, 220], [9, 260], [11, 300]];
-  const VERT_W = 5;
-  const VERT_H = 4;
+  const VERTEBRAE = [["T11", 35], ["T12", 42.5], ["L1", 51.4], ["L2", 62.5], ["L3", 73.3],
+    ["L4", 80.9], ["L5", 87.7]];
+  // Body edges as [distance from the spine, height], measured from the picture.
+  const SIDE = [[49, 11.3], [48.8, 23.6], [49.8, 33], [51.4, 42.5], [45, 47], [43.2, 51.9],
+    [42.5, 61.3], [44.8, 70.8], [47.9, 80.2], [49.5, 89.6], [51.7, 99.1], [53.5, 108.5],
+    [54.5, 117.9], [55.4, 127.4], [56.6, 136.8], [56.6, 146.2], [56.4, 155.7], [55.7, 165.1],
+    [55, 174.5], [53.8, 184], [52.4, 193.4], [50.9, 202.8], [49.1, 212.3], [47.2, 221.7],
+    [45.8, 231.1], [44.8, 240.6], [44.6, 250], [45.3, 259.4], [46.9, 268.9], [47.9, 278.3],
+    [48, 285.3]];
+  const INNER = [[0, Y.CROTCH], [2.4, 149.7], [2.4, 161.5], [3.3, 173.3], [5.4, 185.1],
+    [7.5, 196.9], [9, 208.7], [9.4, 220.5], [9.7, 232.3], [10.6, 244], [13.2, 255.8],
+    [15.8, 267.6], [14.9, 279.4], [15, 285.3]];
 
   const fmt = (p) => `${+p[0].toFixed(1)} ${+p[1].toFixed(1)}`;
   const place = (sign, pts) => pts.map(([dx, y]) => [MID_X + sign * dx, y]);
+  const poly = (pts) => pts.map((p) => `L${fmt(p)}`).join(" ");
 
-  // A smooth curve through the points (Catmull-Rom as cubic Beziers).
-  function smooth(pts) {
-    let d = "";
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i - 1] || pts[i];
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      const p3 = pts[i + 2] || p2;
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-      d += ` C${fmt(c1)} ${fmt(c2)} ${fmt(p2)}`;
-    }
-    return d;
-  }
-
+  // The tap area: the body outline, closed across the top and along the bottom crop.
   const L_SIDE = place(-1, SIDE);
   const R_SIDE = place(1, SIDE);
   const L_IN = place(-1, INNER);
   const R_IN = place(1, INNER);
-  const CROTCH_CURVE = ` Q${MID_X} ${Y.CROTCH - 6} ${fmt(R_IN[0])}`;
-  const INNER_LINE = `M${fmt(L_IN.at(-1))}${smooth([...L_IN].reverse())}${CROTCH_CURVE}` +
-    smooth(R_IN);
-  // The fill is closed along the crop lines; only the real edges are stroked.
-  const BODY_PATH = `M${fmt(L_SIDE[0])}${smooth(L_SIDE)} L${fmt(L_IN.at(-1))}` +
-    `${smooth([...L_IN].reverse())}${CROTCH_CURVE}${smooth(R_IN)} L${fmt(R_SIDE.at(-1))}` +
-    `${smooth([...R_SIDE].reverse())} Z`;
-  const OUTLINE = `M${fmt(L_SIDE[0])}${smooth(L_SIDE)}M${fmt(R_SIDE[0])}${smooth(R_SIDE)}` +
-    INNER_LINE;
+  const BODY_PATH = `M${fmt(L_SIDE[0])} ${poly(L_SIDE.slice(1))} ` +
+    `${poly([...L_IN].reverse())} ${poly(R_IN.slice(1))} ${poly([...R_SIDE].reverse())} Z`;
 
-  // Right half (drawn again mirrored): shoulder-blade tip, lowest rib, top of the hip
-  // bone, SI dimple, buttock crease, knee crease.
-  const HALF_DETAIL = "M130 0 Q138 9 144 11 Q150 6 157 0 M106 50 Q128 58 150 72 " +
-    "M112 106 Q128 94 156 104 M110 113a2 2 0 1 0 4 0a2 2 0 1 0-4 0 " +
-    "M102 177 Q128 180 160 168 M118 284 Q128 287 140 284";
-  // Sacrum as a soft shield (not a hard triangle), then the cleft between the buttocks.
-  const SACRUM = `M91 ${Y.PELVIS} Q100 107 109 ${Y.PELVIS} Q107 132 100 144 ` +
-    `Q93 132 91 ${Y.PELVIS} Z M100 150 L100 ${Y.CROTCH - 3}`;
-  const BONES = VERTEBRAE.map(([, y]) =>
-    `<rect x="${MID_X - VERT_W / 2}" y="${y - VERT_H / 2}" width="${VERT_W}" ` +
-    `height="${VERT_H}" rx="1.5"/>`).join("");
+  // Labels for talking it through with a physio. [text, x, y, size, rotate].
+  const LABEL_SIZE = 5.6;
+  const SMALL_SIZE = 4.4;
+  const LABELS = [
+    ["lowest ribs", 138, 36, SMALL_SIZE], ["Erector", 72, 56, LABEL_SIZE],
+    ["spinae", 72, 62, LABEL_SIZE], ["QL", 59, 76, LABEL_SIZE],
+    ["Erector spinae", 128, 66, SMALL_SIZE], ["QL", 141, 76, LABEL_SIZE],
+    ["Iliac crest", 138, 86, SMALL_SIZE], ["Iliac crest", 62, 86, SMALL_SIZE],
+    ["Glute", 59, 104, LABEL_SIZE], ["medius", 59, 110, LABEL_SIZE],
+    ["SI", 118.5, 104, SMALL_SIZE], ["SI", 81.5, 104, SMALL_SIZE],
+    ["Sacrum", 100, 110, SMALL_SIZE], ["Glute", 136, 128, LABEL_SIZE],
+    ["maximus", 136, 134, LABEL_SIZE], ["Tailbone", 100, 139, SMALL_SIZE],
+    ["Sit bone", 114, 148, SMALL_SIZE], ["Hamstrings", 72, 200, LABEL_SIZE],
+    ["Hamstrings", 128, 200, LABEL_SIZE], ["IT band", 152, 205, SMALL_SIZE, 90],
+    ["IT band", 48, 205, SMALL_SIZE, -90], ["Back of knee", 128, 247, SMALL_SIZE],
+    ...VERTEBRAE.slice(2).map(([v, y]) => [v, MID_X, y + 1.5, SMALL_SIZE]),
+  ];
+  const LABEL_LAYER =
+    `<g class="map-labels" font-family="sans-serif" font-weight="500" fill="#5A4636" ` +
+    `text-anchor="middle" stroke="#FDFAF6" stroke-width="1.4" stroke-linejoin="round" ` +
+    `paint-order="stroke">` + LABELS.map(([t, x, y, size, rot]) =>
+      `<text x="${x}" y="${y}" font-size="${size}"` +
+      `${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ""}>${t}</text>`).join("") + "</g>";
 
-  // One figure for the tab, the form's thumbnail and the exported image. The attributes
-  // style the exports; the tab's CSS overrides them.
-  const FIGURE =
-    `<path class="body" d="${BODY_PATH}" fill="#F1E7DB"/>` +
-    `<g class="detail" fill="none" stroke="#C9B8A6" stroke-width=".8">` +
-    `<path d="${HALF_DETAIL}"/><path d="${HALF_DETAIL}" ` +
-    `transform="translate(${VIEW_W} 0) scale(-1 1)"/><path d="${SACRUM}"/></g>` +
-    `<g class="bones" fill="#DCCBB8">${BONES}</g>` +
-    `<path class="outline" d="${OUTLINE}" fill="none" stroke="#A08070" stroke-width="1"/>`;
+  // One figure for the tab, the form's thumbnail and the exported image. The body path is
+  // invisible: it is only there to catch taps.
+  const figure = (href = IMG_SRC, labels = false) =>
+    `<image href="${href}" x="0" y="0" width="${VIEW_W}" height="${IMG_H}" ` +
+    `preserveAspectRatio="none"/>` +
+    `<path class="body" d="${BODY_PATH}" fill="#000" fill-opacity="0"/>` +
+    (labels ? LABEL_LAYER : "");
   const SIDE_LABELS =
-    `<g class="side-label" font-size="7" font-family="sans-serif" fill="#8A7868" ` +
+    `<g class="side-label" font-size="6" font-family="sans-serif" fill="#8A7868" ` +
     `letter-spacing=".8"><text x="${LABEL_INSET}" y="${LABEL_Y}">LEFT</text>` +
     `<text x="${VIEW_W - LABEL_INSET}" y="${LABEL_Y}" text-anchor="end">RIGHT</text></g>`;
 
@@ -115,18 +108,12 @@ const Pain = (() => {
     overlay: $("painOverlay"), title: $("painTitle"), region: $("painRegion"),
     levels: $("painLevels"), kinds: $("painKinds"), when: $("painWhen"), note: $("painNote"),
     save: $("painSaveBtn"), del: $("painDeleteBtn"), flag: $("painFlag"),
-    whenDay: $("painWhenDay"), mini: $("painMini"),
+    whenDay: $("painWhenDay"), mini: $("painMini"), labelsBtn: $("painLabelsBtn"),
   };
   const HINT = els.hint.textContent;
+  let showLabels = Store.get("painLabels", false);
 
-  /* ── Entries from before the back-only map ─────────────────── */
-  // They were placed on a small front-and-back figure. Back-view spots that fall inside
-  // the new frame are moved across; the rest keep their text but leave the map.
-  const OLD_MID_X   = 60;
-  const OLD_X_SCALE = 2.2;
-  const OLD_Y = [[66, 0], [80, Y.SCAPULA], [108, Y.RIBS], [140, Y.PELVIS], [160, Y.FOLD],
-    [200, Y.KNEE], [214, VIEW_H]];
-
+  /* ── Entries placed on earlier maps ────────────────────────── */
   // Straight-line lookup in a table of [from, to] pairs sorted by "from".
   function lerpTable(table, v) {
     for (let i = 1; i < table.length; i++) {
@@ -136,18 +123,40 @@ const Pain = (() => {
     }
     return table.at(-1)[1];
   }
+  // Distance of a body edge from the spine at height y.
+  const edgeAt = (pts, y) => lerpTable(pts.map(([dx, py]) => [py, dx]), y);
+  const round1 = (v) => Math.round(v * 10) / 10;
+
+  // v0.01-v0.07: a small front-and-back figure. Back-view spots inside the frame came
+  // across to the v0.08 drawing; the rest keep their text but stay off the map.
+  const V1_MID_X   = 60;
+  const V1_X_SCALE = 2.2;
+  const V1_Y = [[66, 0], [80, 14], [108, 56], [140, 110], [160, 172], [200, 276], [214, 300]];
+  // v0.08-v0.15: the drawn back. Landmark heights then -> now, and its outline, so a spot
+  // keeps the same place relative to the landmarks and the body's edge.
+  const V2_MID_X = 100;
+  const V2_Y = [[0, 11.3], [56, Y.RIBS], [98, 87.7], [110, Y.PELVIS], [140, Y.SACRUM],
+    [172, Y.FOLD], [276, Y.KNEE + 4], [300, 285.3]];
+  const V2_SIDE = [[64, 0], [63, 30], [57, 58], [50, 82], [52, 95], [58, 108], [64, 128],
+    [65, 150], [64, 170], [60, 200], [55, 235], [49, 270], [46, 300]];
 
   function migrate(e) {
-    if (e.map) return e;
-    const inFrame = e.view === "back" && e.y >= OLD_Y[0][0] && e.y <= OLD_Y.at(-1)[0];
-    if (!inFrame) return { ...e, map: 1 };
-    const x = MID_X + (e.x - OLD_MID_X) * OLD_X_SCALE;
-    const y = lerpTable(OLD_Y, e.y);
-    return { ...e, map: MAP_VERSION, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+    let m = e;
+    if (!m.map) {
+      const inFrame = m.view === "back" && m.y >= V1_Y[0][0] && m.y <= V1_Y.at(-1)[0];
+      if (!inFrame) return { ...m, map: 1 };
+      m = { ...m, map: 2, x: V2_MID_X + (m.x - V1_MID_X) * V1_X_SCALE, y: lerpTable(V1_Y, m.y) };
+    }
+    if (m.map === 2) {
+      const y = lerpTable(V2_Y, m.y);
+      const scale = edgeAt(SIDE, y) / edgeAt(V2_SIDE, m.y);
+      m = { ...m, map: MAP_VERSION, x: round1(MID_X + (m.x - V2_MID_X) * scale), y: round1(y) };
+    }
+    return m;
   }
 
   let entries = Store.get("pain", []);
-  if (entries.some((e) => !e.map)) {
+  if (entries.some((e) => !e.map || e.map === 2)) {
     entries = entries.map(migrate);
     Store.set("pain", entries);
   }
@@ -173,9 +182,6 @@ const Pain = (() => {
     document.dispatchEvent(new CustomEvent("history:changed"));
   }
 
-  // Distance of a body edge from the spine at height y.
-  const edgeAt = (pts, y) => lerpTable(pts.map(([dx, py]) => [py, dx]), y);
-
   function vertebraAt(y) {
     return VERTEBRAE.reduce((best, v) =>
       (Math.abs(v[1] - y) < Math.abs(best[1] - y) ? v : best))[0];
@@ -187,32 +193,27 @@ const Pain = (() => {
     const ad = Math.abs(x - MID_X);
     const s = (name) => `${name}, ${x < MID_X ? "left" : "right"}`;
 
-    if (ad < SPINE_HALF && y < Y.CROTCH) {
+    if (ad < X.SPINE && y < Y.CROTCH) {
       if (y < Y.PELVIS) return `Spine, centre (around ${vertebraAt(y)})`;
       return y < Y.SACRUM ? "Sacrum, centre" : "Tailbone (coccyx)";
     }
     if (y < Y.RIBS) {
-      if (ad < X.NEAR_SPINE) return s("Mid back, beside the spine");
-      const onBlade = y < Y.SCAPULA && ad >= X.SCAPULA_INNER;
-      if (onBlade) return s("Bottom of the shoulder blade");
-      return ad < X.MID_BACK ? s("Mid back") : s("Side of the ribs");
+      return ad < X.ERECTOR ? s("Mid back, beside the spine") : s("Side of the lower ribs");
     }
     if (y < Y.CREST) {
-      if (ad < X.NEAR_SPINE) return s("Lower back, beside the spine");
-      return ad < X.QL ? s("Lower back, outer (QL area)") : s("Flank (side of the waist)");
+      return ad < X.ERECTOR ? s("Lower back muscle beside the spine (erector spinae)") :
+        s("Lower back, outer (QL)");
     }
     if (y < Y.PELVIS) {
-      return ad < X.NEAR_SPINE ? s("Lower back, beside the spine") :
+      return ad < X.SI ? s("Lower back muscle beside the spine (erector spinae)") :
         s("Top of the hip bone (iliac crest)");
     }
-    if (y < Y.SACRUM) {
-      if (ad < X.SI) return s("SI joint area");
-      return ad < X.BUTTOCK ? s("Top of the buttock") : s("Outer hip");
-    }
-    if (y < Y.CROTCH) {
-      if (ad >= X.TROCHANTER) return s("Outer hip (greater trochanter)");
+    if (y < Y.FOLD) {
+      if (y < Y.SACRUM && ad < X.SI) return s("SI joint");
+      if (ad >= X.TROCHANTER && y >= Y.GLUTE_MED) return s("Outer hip (greater trochanter)");
+      if (y < Y.GLUTE_MED && ad >= X.GLUTE_MED) return s("Upper outer buttock (glute medius)");
       if (y > Y.SIT_BONE && ad < X.SIT_BONE) return s("Sit bone (bottom of the buttock)");
-      return s("Buttock (glute)");
+      return s("Buttock (glute maximus)");
     }
     if (y >= Y.KNEE) return s("Back of the knee");
     const inner = edgeAt(INNER, y);
@@ -246,9 +247,17 @@ const Pain = (() => {
       const dot = marker(e, last ? MARK_R_LAST : MARK_R, false);
       return `<g class="mark" style="opacity:${last ? 1 : 0.55}">${dot}</g>`;
     }).join("");
-    els.map.innerHTML = SIDE_LABELS + FIGURE + marks +
+    els.map.innerHTML = figure(IMG_SRC, showLabels) + SIDE_LABELS + marks +
       (pending ? pendingMarker(pending, MARK_R_LAST) : "");
+    els.labelsBtn.classList.toggle("on", showLabels);
+    els.labelsBtn.setAttribute("aria-pressed", String(showLabels));
   }
+
+  els.labelsBtn.addEventListener("click", () => {
+    showLabels = !showLabels;
+    Store.set("painLabels", showLabels);
+    renderMap();
+  });
 
   function renderHint() {
     els.hint.textContent = pending ? pending.region : HINT;
@@ -262,8 +271,7 @@ const Pain = (() => {
     renderHint();
   }
 
-  const MAP_BOX = `0 ${LABEL_Y - TOP_PAD / 2} ${VIEW_W} ${VIEW_H - LABEL_Y + TOP_PAD / 2}`;
-  els.map.setAttribute("viewBox", MAP_BOX);
+  els.map.setAttribute("viewBox", `0 0 ${VIEW_W} ${VIEW_H}`);
   els.mini.setAttribute("viewBox", `0 0 ${VIEW_W} ${VIEW_H}`);
 
   // Tap: show the spot for a moment, then open the form. Tapping again moves the spot;
@@ -299,7 +307,7 @@ const Pain = (() => {
     els.note.value = draft.note;
     els.del.hidden = !entry.id;
     els.mini.hidden = !onMap(draft);
-    if (onMap(draft)) els.mini.innerHTML = FIGURE + pendingMarker(draft, MARK_R_MINI);
+    if (onMap(draft)) els.mini.innerHTML = figure() + pendingMarker(draft, MARK_R_MINI);
     renderEditor();
     els.overlay.classList.add("visible");
   }
@@ -430,7 +438,7 @@ const Pain = (() => {
       `Day 1 (back first locked up): ${dateOf(parseDay(Targets.dayOne()).getTime())}`,
       `Exported: ${dateOf(now)}, ${timeOf(now)}`,
       "Pain scale 0-10. #numbers match the numbered map of the back (seen from behind, " +
-        "nipple line to knees).",
+        "lowest ribs to knees).",
       "",
     ];
     [...days].sort().forEach((key) => {
@@ -451,16 +459,18 @@ const Pain = (() => {
   }
 
   /* ── Export: numbered map image ────────────────────────────── */
-  function mapSvg() {
+  // The exported image draws the illustration from a data URL: an SVG rendered as an image
+  // can't load files of its own. Labels follow the on-screen switch.
+  function mapSvg(href = IMG_SRC) {
     const w = VIEW_W;
-    const top = 46;                       // title, subtitle and LEFT / RIGHT
+    const top = 30;                       // title and subtitle
     const marks = sorted().filter(onMap).map((e) => marker(e, MARK_R_EXPORT, true)).join("");
     const legend = [["0-3", COLOURS.low], ["4-6", COLOURS.mid], ["7-10", COLOURS.high]]
       .map(([t, c], i) => `<circle cx="${w - 64 + i * 22}" cy="22" r="3.5" fill="${c}"/>` +
         `<text x="${w - 58 + i * 22}" y="24.5" font-size="6" font-family="sans-serif" ` +
         `fill="#6B5B4E">${t}</text>`).join("");
     const vw = w + 12;
-    const vh = VIEW_H + top + 8;
+    const vh = VIEW_H + top + 4;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 0 ${vw} ${vh}" ` +
       `width="${vw * EXPORT_SCALE}" height="${vh * EXPORT_SCALE}">` +
       `<rect x="-6" width="${vw}" height="${vh}" fill="#FDFAF6"/>` +
@@ -468,12 +478,24 @@ const Pain = (() => {
       `Pain map · ${Targets.label(todayKey(), DAY_HEAD)}</text>` +
       `<text x="0" y="24" font-size="6" font-family="sans-serif" fill="#6B5B4E">` +
       `The back, seen from behind</text>${legend}` +
-      `<g transform="translate(0 ${top})">${SIDE_LABELS}${FIGURE}${marks}</g></svg>`;
+      `<g transform="translate(0 ${top})"><svg width="${w}" height="${VIEW_H}" ` +
+      `viewBox="0 0 ${w} ${VIEW_H}">${figure(href, showLabels)}${SIDE_LABELS}${marks}</svg>` +
+      `</g></svg>`;
   }
 
-  function mapPng() {
+  async function imageDataUrl(src) {
+    const blob = await (await fetch(src)).blob();
     return new Promise((resolve, reject) => {
-      const svg = mapSvg();
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function mapPng() {
+    const svg = mapSvg(await imageDataUrl(IMG_SRC));
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
         const c = document.createElement("canvas");
@@ -552,5 +574,5 @@ const Pain = (() => {
   document.addEventListener("day:changed", render);
   render();
 
-  return { render, maxForDay, levelColour, journalText, mapSvg, regionAt };
+  return { render, maxForDay, levelColour, journalText, mapSvg, mapPng, regionAt };
 })();

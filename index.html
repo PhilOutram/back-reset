@@ -6,7 +6,7 @@
   <title>Back Reset</title>
   <meta name="description" content="Guided back-release stretches and a stand / sit / move desk timer that beeps when it's time to change.">
   <meta name="theme-color" content="#F7F3ED">
-  <meta name="app-version" content="v0.15">
+  <meta name="app-version" content="v0.16">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Back Reset">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.15">
+  <link rel="stylesheet" href="styles.css?v=0.16">
 </head>
 <body>
 <div class="app">
@@ -175,7 +175,10 @@
   <!-- ═══ PAIN ═══ -->
   <section class="view" id="painView">
     <div class="card pain-card">
-      <p class="pain-hint" id="painHint" aria-live="polite">Tap where it hurts · seen from behind</p>
+      <div class="pain-top">
+        <p class="pain-hint" id="painHint" aria-live="polite">Tap where it hurts · seen from behind</p>
+        <button class="labels-btn" id="painLabelsBtn" aria-pressed="false">Labels</button>
+      </div>
       <svg class="body-map" id="bodyMap" role="img" aria-label="Map of the back, seen from behind"></svg>
       <div class="pain-actions">
         <button class="btn btn-soft" id="painCopyBtn">Copy journal</button>
@@ -286,6 +289,7 @@
         <h3>Pain</h3>
         <ul>
           <li>Tap the map of your back where it hurts. The spot shows for a second, with its name above the map, before the form opens. Wrong spot? Close the form and tap again.</li>
+          <li><strong>Labels</strong> names the muscles and bones on the map (erector spinae, QL, glutes, SI joints, L1-L5...) - handy when talking it through with your physio. The shared map image shows them too while they're on.</li>
           <li>Pick a score from 0-10, what it feels like, and add a note. You can also type over the name of the spot.</li>
           <li>Tap an entry in the list to edit or delete it.</li>
           <li><strong>Copy journal</strong> gives a dated text log (with your daily activity) to paste into an email or an AI chat. <strong>Share with map</strong> also sends a body map with every entry numbered to match the text.</li>
@@ -352,7 +356,7 @@
 
 </div>
 
-<script src="version.js?v=0.15"></script>
+<script src="version.js?v=0.16"></script>
 <script>
   // Stale-script guard: if a cached older version.js answered this newer page, reload
   // once so the new service worker can serve matching files.
@@ -367,12 +371,12 @@
     }
   })();
 </script>
-<script src="core.js?v=0.15"></script>
-<script src="routines.js?v=0.15"></script>
-<script src="stretch.js?v=0.15"></script>
-<script src="desk.js?v=0.15"></script>
-<script src="pain.js?v=0.15"></script>
-<script src="log.js?v=0.15"></script>
-<script src="app.js?v=0.15"></script>
+<script src="core.js?v=0.16"></script>
+<script src="routines.js?v=0.16"></script>
+<script src="stretch.js?v=0.16"></script>
+<script src="desk.js?v=0.16"></script>
+<script src="pain.js?v=0.16"></script>
+<script src="log.js?v=0.16"></script>
+<script src="app.js?v=0.16"></script>
 </body>
 </html>
